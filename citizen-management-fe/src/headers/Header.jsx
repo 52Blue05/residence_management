@@ -292,11 +292,13 @@ const Header = () => {
           avatarDropdownRef.current &&
           !avatarDropdownRef.current.contains(event.target)
         ) {
+          setIsAvatarOpen(false);
         }
         if (
           notificationsDropdownRef.current &&
           !notificationsDropdownRef.current.contains(event.target)
         ) {
+          setIsNotificationsOpen(false);
         }
       }
     };
