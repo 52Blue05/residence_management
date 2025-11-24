@@ -1,4 +1,5 @@
 "use client";
+import ClockBadge from "../components/ClockBadge";
 
 import React, { useState, useRef, useEffect } from "react";
 const MenuIcon = ({ className }) => (
@@ -253,18 +254,6 @@ const Header = () => {
         },
       ],
     },
-    {
-      href: "#",
-      label: "Money",
-    },
-    {
-      href: "#",
-      label: "About",
-    },
-    {
-      href: "#",
-      label: "Contact",
-    },
   ];
   const avatarDropdownLinks = [
     {
@@ -317,14 +306,14 @@ const Header = () => {
     >
       {/* dùng w-full thay vì container */}
       <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {}
+        <div className="flex items-center justify-between h-16 relative w-full">
+          {/* LEFT: logo + menu */}
           <div className="flex items-center gap-10">
             {}
             <a href="#" className="flex items-center gap-2 shrink-0">
               <MountainIcon className="h-6 w-6 text-gray-900 dark:text-gray-100" />
               <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Acme Inc
+                Residence Management
               </span>
             </a>
 
@@ -380,7 +369,12 @@ const Header = () => {
             </nav>
           </div>
 
-          {}
+          {/* CENTER: CLOCK BADGE (bán nguyệt) */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-0">
+            <ClockBadge />
+          </div>
+
+          {/* RIGHT: Noti + Avatar */}
           <div className="flex items-center gap-4">
             {}
             <div

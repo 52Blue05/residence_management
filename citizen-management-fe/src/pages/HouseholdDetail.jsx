@@ -80,7 +80,7 @@ export default function HouseholdDetail() {
 
       {/* Card chính ở giữa màn hình */}
       <div className="min-h-screen flex items-center justify-center p-6 relative z-10">
-        <div className="w-[195vh] max-w-full h-[90vh] rounded-2xl overflow-hidden shadow-2xl bg-sky-500/95 backdrop-blur-md flex flex-col">
+        <div className="w-[195vh] h-[93vh] max-h-screen rounded-2xl overflow-hidden shadow-2xl bg-sky-500/95 backdrop-blur-md flex flex-col">
           {/* HEADER chạy ngang full card */}
           <Header />
 
