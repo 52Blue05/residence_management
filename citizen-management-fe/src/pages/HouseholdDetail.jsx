@@ -170,12 +170,14 @@ export default function HouseholdDetail() {
 
       {/* Card chính ở giữa màn hình */}
       <div className="min-h-screen flex items-center justify-center p-6 relative z-10">
-        <div className="w-[195vh] h-[93vh] max-h-screen rounded-2xl overflow-hidden shadow-2xl bg-sky-500/95 backdrop-blur-md flex flex-col">
-          {/* HEADER chạy ngang full card */}
-          <Header />
+        <div className="w-[195vh] h-[93vh] max-h-screen rounded-t-2xl shadow-2xl bg-sky-500/95 backdrop-blur-md flex flex-col overflow-visible">
+          {/* HEADER chạy ngang full card - overflow-visible để dropdown ra ngoài */}
+          <div className="overflow-visible z-50">
+            <Header />
+          </div>
 
-          {/* THÂN: scroll trong khung, full width */}
-          <div className="flex-1 overflow-hidden flex gap-6 p-6 md:p-8">
+          {/* THÂN: scroll trong khung */}
+          <div className="flex-1 overflow-hidden flex gap-6 p-6 md:p-8 rounded-b-2xl">
             {/* Nửa trái: Danh sách hộ khẩu + Nhân khẩu (scroll) */}
             <div className="flex-1 overflow-y-auto space-y-6">
               {/* Danh sách Nhân khẩu */}
@@ -208,23 +210,49 @@ export default function HouseholdDetail() {
               </div>
             </div>
 
-            {/* Nửa phải: Khung cố định */}
-            <div className="w-72 shrink-0 bg-gray-900 rounded-2xl shadow-xl p-6 border border-white/10 h-fit sticky top-0">
-              <h2 className="text-2xl font-semibold mb-4">
-                Thông tin chi tiết
-              </h2>
-              <div className="space-y-4 text-gray-300">
-                <div>
-                  <p className="text-sm text-gray-400">Số hộ khẩu</p>
-                  <p className="font-medium">HK123456</p>
+            {/* Nửa phải: 1 khung to chứa 2 khung nhỏ */}
+            <div className="w-72 shrink-0 bg-gray-900 rounded-2xl shadow-xl p-6 border border-white/10 flex flex-col gap-4 overflow-hidden">
+              {/* Khung nhỏ trên: Hình tròn - Số nhân khẩu */}
+              <div className="flex-1 bg-gray-800 rounded-xl p-4 flex items-center justify-center border border-gray-700">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-white-600 to-yellow-600 flex items-center justify-center shadow-lg">
+                    <div className="text-center">
+                      <p className="text-white text-xs opacity-80">Nhân khẩu</p>
+                      <p className="text-white text-3xl font-bold">
+                        {nhanKhau.length}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-400">Chủ hộ</p>
-                  <p className="font-medium">Nguyễn Văn A</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-400">Địa chỉ</p>
-                  <p className="font-medium">25 Tố Hữu, La Khê, Hà Đông</p>
+              </div>
+
+              {/* Khung nhỏ dưới: Lịch sử biến động */}
+              <div className="flex-1 bg-gray-800 rounded-xl p-4 border border-gray-700 overflow-y-auto">
+                <h3 className="text-lg font-semibold mb-3 text-white">
+                  Lịch sử biến động
+                </h3>
+                <div className="space-y-2">
+                  <div className="bg-gray-700 rounded-lg p-2 border border-gray-600 hover:border-purple-500 transition">
+                    <p className="text-xs text-gray-400">01/01/2024</p>
+                    <p className="text-white text-sm font-medium">
+                      Thêm nhân khẩu
+                    </p>
+                    <p className="text-xs text-gray-500">Nguyễn Văn D</p>
+                  </div>
+                  <div className="bg-gray-700 rounded-lg p-2 border border-gray-600 hover:border-purple-500 transition">
+                    <p className="text-xs text-gray-400">15/12/2023</p>
+                    <p className="text-white text-sm font-medium">
+                      Xóa nhân khẩu
+                    </p>
+                    <p className="text-xs text-gray-500">Trần Thị E</p>
+                  </div>
+                  <div className="bg-gray-700 rounded-lg p-2 border border-gray-600 hover:border-purple-500 transition">
+                    <p className="text-xs text-gray-400">10/11/2023</p>
+                    <p className="text-white text-sm font-medium">
+                      Cập nhật thông tin
+                    </p>
+                    <p className="text-xs text-gray-500">Nguyễn Văn A</p>
+                  </div>
                 </div>
               </div>
             </div>
