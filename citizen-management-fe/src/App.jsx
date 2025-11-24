@@ -73,7 +73,9 @@ export default function Login() {
             </div>
           </div>
 
-          <h1 className="text-4xl font-bold mb-4 text-center">Quản lý dân cư</h1>
+          <h1 className="text-4xl font-bold mb-4 text-center">
+            Quản lý dân cư
+          </h1>
 
           <p className="text-center text-white/90 text-lg">
             Tổ dân phố 7, phường La Khê
@@ -98,7 +100,11 @@ export default function Login() {
               onClick={handleGoogle}
               className="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center gap-3"
             >
-              <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-6" alt="" />
+              <img
+                src="https://www.svgrepo.com/show/475656/google-color.svg"
+                className="w-6"
+                alt=""
+              />
               <span>Continue with Google</span>
             </button>
 
@@ -106,7 +112,11 @@ export default function Login() {
               onClick={handleMicrosoft}
               className="w-full bg-gray-700 hover:bg-gray-600 p-3 rounded-lg flex items-center justify-center gap-3"
             >
-              <img src="https://www.svgrepo.com/show/452062/microsoft.svg" className="w-6 invert" alt="" />
+              <img
+                src="https://www.svgrepo.com/show/452062/microsoft.svg"
+                className="w-6 invert"
+                alt=""
+              />
               <span>Continue with Microsoft</span>
             </button>
           </div>
@@ -162,17 +172,32 @@ export default function Login() {
                 />
                 <span className="text-gray-300">Keep me signed in</span>
               </label>
-              <a href="#" onClick={handleResetPassword} className="text-blue-400 hover:underline">Reset password</a>
+              <a
+                href="#"
+                onClick={handleResetPassword}
+                className="text-blue-400 hover:underline"
+              >
+                Reset password
+              </a>
             </div>
 
-            <button className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-semibold" type="submit">
+            <button
+              className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-semibold"
+              type="submit"
+            >
               Sign in to your account
             </button>
           </form>
 
           <p className="mt-6 text-gray-300 text-center">
             New to our platform?{" "}
-            <a href="#" onClick={handleCreateAccount} className="text-blue-400 hover:underline">Create an account</a>
+            <a
+              href="#"
+              onClick={handleCreateAccount}
+              className="text-blue-400 hover:underline"
+            >
+              Create an account
+            </a>
           </p>
         </div>
       </div>

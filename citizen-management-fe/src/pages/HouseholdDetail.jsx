@@ -1,8 +1,6 @@
-import Header from '../headers/Header'; // sửa đường dẫn nếu cần
+import Header from "../headers/Header";
 
 export default function HouseholdDetail() {
-
-  // Dummy data (sau này bạn load từ API)
   const household = {
     soHoKhau: "HK123456",
     chuHo: "Nguyễn Văn A",
@@ -63,20 +61,33 @@ export default function HouseholdDetail() {
       dangKyThuongTru: "2005-06-12",
       thuongTruTruoc: "",
       quanHeChuHo: "Con trai",
-    }
+    },
   ];
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen w-screen bg-sky-500 text-white">
-        {/* Fullscreen inner area */}
-        <div className="w-full h-screen p-10">
-          {/* Use flex column so two sections fill and scroll if cần */}
-          <div className="w-full h-full flex flex-col gap-10">
-            
-            {/* Hộ Khẩu */}
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-8 border border-white/10 flex-1 overflow-auto">
+      {/* Video nền */}
+      <video
+        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
+        src="/videos/background.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        style={{ zIndex: 0 }}
+      />
+
+      {/* Card chính ở giữa màn hình */}
+      <div className="min-h-screen flex items-center justify-center p-6 relative z-10">
+        <div className="w-[195vh] max-w-full h-[90vh] rounded-2xl overflow-hidden shadow-2xl bg-sky-500/95 backdrop-blur-md flex flex-col">
+          {/* HEADER chạy ngang full card */}
+          <Header />
+
+          {/* THÂN: scroll trong khung, full width */}
+          <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-6">
+            {/* Thông tin Hộ khẩu */}
+            <div className="bg-gray-900 rounded-2xl shadow-xl p-8 border border-white/10">
               <h2 className="text-3xl font-semibold mb-6">Thông tin Hộ khẩu</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-200">
@@ -112,14 +123,16 @@ export default function HouseholdDetail() {
               </div>
             </div>
 
-            {/* Nhân Khẩu */}
-            <div className="bg-gray-800 rounded-2xl shadow-xl p-8 border border-white/10 flex-1 overflow-auto">
-              <h2 className="text-3xl font-semibold mb-6">Danh sách Nhân khẩu</h2>
+            {/* Danh sách Nhân khẩu */}
+            <div className="bg-gray-900 rounded-2xl shadow-xl p-8 border border-white/10">
+              <h2 className="text-3xl font-semibold mb-6">
+                Danh sách Nhân khẩu
+              </h2>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-gray-200 border-collapse">
                   <thead>
-                    <tr className="bg-gray-700 text-gray-300 uppercase text-sm">
+                    <tr className="bg-gray-800 text-gray-300 uppercase text-sm">
                       <th className="p-3 text-left">Họ tên</th>
                       <th className="p-3 text-left">Ngày sinh</th>
                       <th className="p-3 text-left">CCCD</th>
@@ -127,13 +140,12 @@ export default function HouseholdDetail() {
                       <th className="p-3 text-left">Quan hệ</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {nhanKhau.map((nk) => (
                       <tr
                         key={nk.id}
-                        className={`border-b border-gray-700 hover:bg-gray-700/40 transition ${
-                          nk.quanHeChuHo === "Chủ hộ" ? "bg-purple-900/30" : ""
+                        className={`border-b border-gray-700 hover:bg-gray-800/70 transition ${
+                          nk.quanHeChuHo === "Chủ hộ" ? "bg-purple-900/40" : ""
                         }`}
                       >
                         <td className="p-3 font-medium">
@@ -153,9 +165,7 @@ export default function HouseholdDetail() {
                   </tbody>
                 </table>
               </div>
-
             </div>
-
           </div>
         </div>
       </div>
