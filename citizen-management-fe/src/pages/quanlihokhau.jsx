@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function HouseholdDetail() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const household = useMemo(
     () => [
@@ -164,6 +165,13 @@ export default function HouseholdDetail() {
   // Search & sort state for household list
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState(""); // '', 'name', 'soHoKhau'
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const [filters, setFilters] = useState({
+    phuong: "",
+    quan: "",
+    duongPho: "",
+    chuHo: "",
+  });
 
   const filteredHouseholds = useMemo(() => {
     let arr = [...household];
@@ -175,13 +183,28 @@ export default function HouseholdDetail() {
           h.chuHo.toLowerCase().includes(q)
       );
     }
+    // Apply filters
+    if (filters.phuong) {
+      arr = arr.filter((h) => h.phuong === filters.phuong);
+    }
+    if (filters.quan) {
+      arr = arr.filter((h) => h.quan === filters.quan);
+    }
+    if (filters.duongPho) {
+      arr = arr.filter((h) => h.duongPho === filters.duongPho);
+    }
+    if (filters.chuHo) {
+      arr = arr.filter((h) =>
+        h.chuHo.toLowerCase().includes(filters.chuHo.toLowerCase())
+      );
+    }
     if (sortBy === "name") {
       arr.sort((a, b) => a.chuHo.localeCompare(b.chuHo, "vi"));
     } else if (sortBy === "soHoKhau") {
       arr.sort((a, b) => a.soHoKhau.localeCompare(b.soHoKhau));
     }
     return arr;
-  }, [household, query, sortBy]);
+  }, [household, query, sortBy, filters]);
 
   return (
     <>
@@ -204,9 +227,51 @@ export default function HouseholdDetail() {
           <div className="overflow-visible z-50">
             <Header />
           </div>
-
           {/* THÂN: scroll trong khung */}
           <div className="flex-1 overflow-hidden flex gap-6 p-6 md:p-8 rounded-b-2xl">
+            {/* Sidebar: Menu mở rộng/thu gọn */}
+            <div
+              className={`transition-all duration-300 ease-in-out ${
+                sidebarOpen ? "w-64" : "w-20"
+              } shrink-0 bg-gray-900 rounded-2xl shadow-xl p-4 border border-white/10 flex flex-col items-center gap-6 h-fit max-h-[80vh] overflow-y-auto`}
+            >
+              {/* Menu Toggle Button */}
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="w-full flex items-center justify-center bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition"
+                title={sidebarOpen ? "Thu gọn" : "Mở rộng"}
+              >
+                <span className="text-xl">☰</span>
+              </button>
+
+              {/* House Icon */}
+              <div className="flex items-center justify-center">
+                <img
+                  src="/images/house.png"
+                  alt="House Icon"
+                  className="w-12 h-12"
+                />
+              </div>
+
+              {/* Menu Items */}
+              {sidebarOpen && (
+                <div className="w-full space-y-3 text-left">
+                  <button className="w-full bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition text-sm flex items-center gap-2">
+                    <span>📋</span> Danh sách hộ khẩu
+                  </button>
+                  <button className="w-full bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition text-sm flex items-center gap-2">
+                    <span>👥</span> Quản lý nhân khẩu
+                  </button>
+                  <button className="w-full bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition text-sm flex items-center gap-2">
+                    <span>📊</span> Báo cáo thống kê
+                  </button>
+                  <button className="w-full bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-lg transition text-sm flex items-center gap-2">
+                    <span>⚙️</span> Cài đặt
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Nửa trái: Danh sách hộ khẩu + Nhân khẩu (scroll) */}
             <div className="flex-1 overflow-y-auto space-y-6">
               {/* Danh sách Nhân khẩu */}
@@ -215,8 +280,8 @@ export default function HouseholdDetail() {
                   Danh sách Hộ khẩu
                 </h2>
 
-                {/* Taskbar: sort + search */}
-                <div className="flex items-center justify-between gap-3 mb-4">
+                {/* Taskbar: sort + search + create + filter */}
+                <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
                   <div className="flex items-center gap-2">
                     <label className="text-sm text-gray-300">Sắp xếp:</label>
                     <select
@@ -242,9 +307,24 @@ export default function HouseholdDetail() {
                         setQuery("");
                         setSortBy("");
                       }}
-                      className="bg-gray-700 text-gray-200 px-3 py-2 rounded"
+                      className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-3 py-2 rounded transition"
                     >
                       Reset
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowFilterModal(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition flex items-center gap-2"
+                    >
+                      <span>🔍</span> Lọc
+                    </button>
+                    <button
+                      onClick={() => alert("Tạo mới hộ khẩu")}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition flex items-center gap-2"
+                    >
+                      <span>➕</span> Tạo mới
                     </button>
                   </div>
                 </div>
@@ -339,6 +419,129 @@ export default function HouseholdDetail() {
           </div>
         </div>
       </div>
+
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-2xl shadow-2xl p-8 w-96 border border-white/10">
+            <h3 className="text-2xl font-bold text-white mb-6">Lọc hộ khẩu</h3>
+
+            <div className="space-y-4 mb-6">
+              {/* Lọc theo Phường */}
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">
+                  Phường:
+                </label>
+                <select
+                  value={filters.phuong}
+                  onChange={(e) =>
+                    setFilters({ ...filters, phuong: e.target.value })
+                  }
+                  className="w-full bg-gray-800 text-gray-200 p-2 rounded border border-gray-700 focus:border-blue-500"
+                >
+                  <option value="">-- Tất cả --</option>
+                  <option value="La Khê">La Khê</option>
+                  <option value="Mộ Lao">Mộ Lao</option>
+                  <option value="Văn Quán">Văn Quán</option>
+                  <option value="Yên Nghĩa">Yên Nghĩa</option>
+                  <option value="Hà Cầu">Hà Cầu</option>
+                  <option value="Phú Lãm">Phú Lãm</option>
+                  <option value="Kiến Hưng">Kiến Hưng</option>
+                  <option value="Dương Nội">Dương Nội</option>
+                </select>
+              </div>
+
+              {/* Lọc theo Quận */}
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">
+                  Quận:
+                </label>
+                <select
+                  value={filters.quan}
+                  onChange={(e) =>
+                    setFilters({ ...filters, quan: e.target.value })
+                  }
+                  className="w-full bg-gray-800 text-gray-200 p-2 rounded border border-gray-700 focus:border-blue-500"
+                >
+                  <option value="">-- Tất cả --</option>
+                  <option value="Hà Đông">Hà Đông</option>
+                </select>
+              </div>
+
+              {/* Lọc theo Đường */}
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">
+                  Đường phố:
+                </label>
+                <select
+                  value={filters.duongPho}
+                  onChange={(e) =>
+                    setFilters({ ...filters, duongPho: e.target.value })
+                  }
+                  className="w-full bg-gray-800 text-gray-200 p-2 rounded border border-gray-700 focus:border-blue-500"
+                >
+                  <option value="">-- Tất cả --</option>
+                  <option value="Tố Hữu">Tố Hữu</option>
+                  <option value="Lê Văn Lương">Lê Văn Lương</option>
+                  <option value="Quang Trung">Quang Trung</option>
+                  <option value="Trần Phú">Trần Phú</option>
+                  <option value="Nguyễn Trãi">Nguyễn Trãi</option>
+                  <option value="Phùng Hưng">Phùng Hưng</option>
+                  <option value="Bà Triệu">Bà Triệu</option>
+                  <option value="Lý Thường Kiệt">Lý Thường Kiệt</option>
+                  <option value="Hà Trì">Hà Trì</option>
+                  <option value="Tô Hiệu">Tô Hiệu</option>
+                  <option value="Quốc lộ 6">Quốc lộ 6</option>
+                  <option value="Văn Phú">Văn Phú</option>
+                </select>
+              </div>
+
+              {/* Lọc theo Tên chủ hộ */}
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">
+                  Tên chủ hộ:
+                </label>
+                <input
+                  type="text"
+                  value={filters.chuHo}
+                  onChange={(e) =>
+                    setFilters({ ...filters, chuHo: e.target.value })
+                  }
+                  placeholder="Nhập tên chủ hộ..."
+                  className="w-full bg-gray-800 text-gray-200 p-2 rounded border border-gray-700 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setFilters({ phuong: "", quan: "", duongPho: "", chuHo: "" });
+                  setShowFilterModal(false);
+                }}
+                className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded transition"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  setFilters({ phuong: "", quan: "", duongPho: "", chuHo: "" });
+                }}
+                className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded transition"
+              >
+                Reset lọc
+              </button>
+              <button
+                onClick={() => setShowFilterModal(false)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
+              >
+                Áp dụng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,10 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
+
+  // Clear form data and storage on component mount (khi quay lại trang login)
+  useEffect(() => {
+    // Clear từ localStorage/sessionStorage nếu có lưu
+    localStorage.removeItem("email");
+    localStorage.removeItem("password");
+    sessionStorage.clear();
+  }, []);
 
   const handleGoogle = () => {
     // ví dụ: redirect đến OAuth (thay URL bằng thực tế)
@@ -21,7 +31,7 @@ export default function Login() {
     e.preventDefault();
     console.log("Sign in", { email, password, keepSignedIn });
     // Redirect to household detail page regardless of input
-    window.location.href = "/household-detail";
+    navigate("/household-detail");
   };
 
   const handleResetPassword = (e) => {

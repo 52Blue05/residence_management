@@ -1,6 +1,5 @@
 "use client";
 import ClockBadge from "../components/ClockBadge";
-
 import React, { useState, useRef, useEffect } from "react";
 const MenuIcon = ({ className }) => (
   <svg
@@ -215,13 +214,23 @@ const AvatarIcon = ({ className }) => (
 );
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
+  //const [openDropdown, setOpenDropdown] = useState(null);
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [openMobileDropdown, setOpenMobileDropdown] = useState(null);
   const avatarDropdownRef = useRef(null);
   const notificationsDropdownRef = useRef(null);
   const headerRef = useRef(null);
+
+  // Handle logout - clear form data and navigate to login
+  const handleLogout = () => {
+    // Clear localStorage/sessionStorage if you store form data
+    sessionStorage.clear();
+    localStorage.removeItem("email");
+    localStorage.removeItem("password");
+    // Use full page reload to ensure complete reset of form state
+    window.location.href = "/";
+  };
 
   const navLinks = [
     {
@@ -272,7 +281,7 @@ const Header = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (headerRef.current && !headerRef.current.contains(event.target)) {
-        setOpenDropdown(null);
+        //setOpenDropdown(null);
         setIsAvatarOpen(false);
         setIsNotificationsOpen(false);
         setIsMenuOpen(false);
@@ -318,55 +327,6 @@ const Header = () => {
             </a>
 
             {}
-            <nav className="hidden md:flex items-center gap-6">
-              {navLinks.map((link) =>
-                link.dropdown ? (
-                  <div key={link.label} className="relative">
-                    <button
-                      onClick={() =>
-                        setOpenDropdown(
-                          openDropdown === link.label ? null : link.label
-                        )
-                      }
-                      className="flex items-center gap-1 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-300 focus:outline-none"
-                    >
-                      {link.label}
-                      <ChevronDownIcon
-                        className={`h-4 w-4 transition-transform duration-300 ${
-                          openDropdown === link.label ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-
-                    <div
-                      className={`absolute top-full mt-2 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg transition-opacity duration-300 ${
-                        openDropdown === link.label
-                          ? "opacity-100 visible"
-                          : "opacity-0 invisible"
-                      }`}
-                    >
-                      {link.dropdown.map((item) => (
-                        <a
-                          key={item.label}
-                          href={item.href}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                        >
-                          {item.label}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors duration-300"
-                  >
-                    {link.label}
-                  </a>
-                )
-              )}
-            </nav>
           </div>
 
           {/* CENTER: CLOCK BADGE (bán nguyệt) */}
@@ -384,7 +344,7 @@ const Header = () => {
               <button
                 onClick={() => {
                   setIsNotificationsOpen((s) => !s);
-                  setOpenDropdown(null);
+                  //setOpenDropdown(null);
                   setIsAvatarOpen(false);
                 }}
                 className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none"
@@ -432,7 +392,7 @@ const Header = () => {
               <button
                 onClick={() => {
                   setIsAvatarOpen((s) => !s);
-                  setOpenDropdown(null);
+                  //setOpenDropdown(null);
                   setIsNotificationsOpen(false);
                 }}
                 className="flex items-center gap-2 focus:outline-none"
@@ -447,7 +407,13 @@ const Header = () => {
                 {avatarDropdownLinks.map((item) => (
                   <a
                     key={item.label}
-                    href={item.href}
+                    href={item.label === "Logout" ? "#" : item.href}
+                    onClick={(e) => {
+                      if (item.label === "Logout") {
+                        e.preventDefault();
+                        handleLogout();
+                      }
+                    }}
                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     {item.label}
@@ -544,7 +510,13 @@ const Header = () => {
                 {avatarDropdownLinks.map((item) => (
                   <a
                     key={item.label}
-                    href={item.href}
+                    href={item.label === "Logout" ? "#" : item.href}
+                    onClick={(e) => {
+                      if (item.label === "Logout") {
+                        e.preventDefault();
+                        handleLogout();
+                      }
+                    }}
                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                   >
                     {item.label}
