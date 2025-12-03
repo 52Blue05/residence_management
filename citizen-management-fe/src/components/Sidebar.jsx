@@ -13,53 +13,34 @@ export default function Sidebar() {
     }));
   };
 
+  // Sidebar không chứa URL dynamic, chỉ chứa prefix
   const menuItems = useMemo(
     () => [
       {
         id: "dashboard",
         name: "Dashboard",
         icon: "📊",
-        submenu: null,
         link: "/dashboard",
-        type: "single",
       },
       {
         id: "residents",
         name: "Quản lý Nhân khẩu",
         icon: "Users",
         submenu: [
-          {
-            name: "Danh sách nhân khẩu",
-            link: "/residents",
-            description: "Xem toàn bộ danh sách nhân khẩu trong phường",
-          },
-          {
-            name: "Thêm nhân khẩu mới",
-            link: "/residents/add",
-            description: "Đăng ký nhân khẩu mới vào hệ thống",
-          },
-          {
-            name: "Tìm kiếm nâng cao",
-            link: "/residents/search",
-            description: "Tìm kiếm với nhiều tiêu chí phức tạp",
-          },
+          { name: "Danh sách nhân khẩu", link: "/residents" },
+          { name: "Thêm nhân khẩu mới", link: "/residents/add" },
+          { name: "Tìm kiếm nâng cao", link: "/residents/search" },
         ],
       },
       {
         id: "feeManagement",
         name: "Quản lý thu phí, đóng góp",
-        icon: "💰", // Icon phù hợp với mục này
+        icon: "💰",
         submenu: [
-          { name: "Danh sách thu phí", link: "/fee-management/types" },
-          { name: "Thu phí theo loại", link: "/fee-management/type/:typeId" },
-          {
-            name: "Thu phí theo hộ khẩu",
-            link: "/fee-management/type/:typeId/household/:householdId",
-          },
-          {
-            name: "Lịch sử thu phí",
-            link: "/fee-management/household/:householdId/history",
-          },
+          { name: "Danh sách loại phí", link: "/fee-management/types" },
+          { name: "Thu phí theo loại", link: "/fee-management/type" }, // prefix
+          { name: "Thu phí theo hộ khẩu", link: "/fee-management/household" }, // prefix
+          { name: "Lịch sử thu phí", link: "/fee-management/history" }, // prefix
           { name: "Đóng góp", link: "/fee-management/contribute" },
         ],
       },
@@ -68,21 +49,9 @@ export default function Sidebar() {
         name: "Quản lý Hộ khẩu",
         icon: "Home",
         submenu: [
-          {
-            name: "Danh sách hộ khẩu",
-            link: "/households",
-            description: "Xem toàn bộ hộ khẩu trong phường",
-          },
-          {
-            name: "Thêm hộ khẩu mới",
-            link: "/households/add",
-            description: "Đăng ký hộ khẩu mới",
-          },
-          {
-            name: "Tìm kiếm theo tổ DP",
-            link: "/households/by-area",
-            description: "Xem hộ khẩu theo 7 tổ dân phố",
-          },
+          { name: "Danh sách hộ khẩu", link: "/households" },
+          { name: "Thêm hộ khẩu mới", link: "/households/add" },
+          { name: "Tìm kiếm theo tổ DP", link: "/households/by-area" },
         ],
       },
       {
@@ -110,9 +79,7 @@ export default function Sidebar() {
         id: "temporary",
         name: "Dân cư Tạm trú",
         icon: "UserCheck",
-        submenu: null,
         link: "/temporary-residents",
-        type: "single",
       },
       {
         id: "baocao",
@@ -148,14 +115,13 @@ export default function Sidebar() {
         id: "help",
         name: "Trợ giúp",
         icon: "HelpCircle",
-        submenu: null,
         link: "/help",
-        type: "single",
       },
     ],
     []
   );
 
+  // Xác định auto expand submenu
   const expandedAuto = useMemo(() => {
     const result = {};
     menuItems.forEach((item) => {
@@ -169,34 +135,26 @@ export default function Sidebar() {
     return result;
   }, [location.pathname, menuItems]);
 
+  // Sync state
   useEffect(() => {
     setExpandedMenus(expandedAuto);
   }, [expandedAuto]);
 
   const renderIcon = (icon) => {
-    if (icon === "UserCheck") {
-      return <UserCheck className="w-5 h-5" />;
-    }
-    if (icon === "HelpCircle") {
-      return <HelpCircle className="w-5 h-5" />;
-    }
-    if (icon === "Home") {
-      return <Home className="w-5 h-5" />;
-    }
-    if (icon === "Users") {
-      return <Users className="w-5 h-5" />;
-    }
+    if (icon === "UserCheck") return <UserCheck className="w-5 h-5" />;
+    if (icon === "HelpCircle") return <HelpCircle className="w-5 h-5" />;
+    if (icon === "Home") return <Home className="w-5 h-5" />;
+    if (icon === "Users") return <Users className="w-5 h-5" />;
     return <span className="text-xl">{icon}</span>;
   };
 
   const isPathActive = (path) =>
-    location.pathname === path || location.pathname.startsWith(`${path}/`);
+    location.pathname === path || location.pathname.startsWith(path + "/");
 
   return (
-    <div className="w-64 min-w-[250px] bg-linear-to-b from-blue-950 via-blue-900 to-blue-800 text-white h-screen overflow-y-auto shrink-0">
-      {/* Header */}
+    <div className="w-64 min-w-[250px] bg-blue-900 text-white h-screen overflow-y-auto">
       <div className="p-6 border-b border-blue-700">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
             <span className="text-lg font-bold text-blue-900">QL</span>
           </div>
@@ -207,80 +165,61 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Menu Items */}
       <nav className="p-4 space-y-1">
         {menuItems.map((item) => {
           const hasSubmenu = Array.isArray(item.submenu);
-          const activeSubmenu =
-            hasSubmenu && item.submenu.some((sub) => isPathActive(sub.link));
-          const isActive =
-            !hasSubmenu && item.link ? isPathActive(item.link) : activeSubmenu;
+          const isActive = hasSubmenu
+            ? expandedMenus[item.id]
+            : isPathActive(item.link);
 
           const baseClasses =
-            "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors duration-200 text-sm";
+            "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition";
           const stateClasses = isActive
-            ? "bg-white/15 text-white font-semibold shadow-md"
-            : "text-blue-100 hover:bg-white/10 hover:text-white";
+            ? "bg-white/20 text-white font-semibold"
+            : "text-blue-100 hover:bg-white/10";
 
           return (
             <div key={item.id}>
               {hasSubmenu ? (
-                <div>
+                <>
                   <button
                     onClick={() => toggleMenu(item.id)}
-                    className={`${baseClasses} ${stateClasses}`}
+                    className={baseClasses + " " + stateClasses}
                   >
                     {renderIcon(item.icon)}
-                    <span className="flex-1 text-left truncate">
-                      {item.name}
-                    </span>
-                    {item.badge && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-50 font-semibold">
-                        {item.badge}
-                      </span>
-                    )}
+                    <span className="flex-1">{item.name}</span>
                     <ChevronDown
-                      className={`w-4 h-4 transition-transform duration-200 ${
+                      className={`w-4 h-4 transition-transform ${
                         expandedMenus[item.id] ? "rotate-0" : "-rotate-90"
                       }`}
                     />
                   </button>
+
                   {expandedMenus[item.id] && (
-                    <div className="bg-blue-900/40 rounded-xl mt-1 ml-2 border border-blue-800/40 overflow-hidden">
-                      {item.submenu.map((subitem) => {
-                        const subActive = isPathActive(subitem.link);
-                        return (
-                          <Link
-                            key={subitem.link}
-                            to={subitem.link}
-                            className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors duration-200 border-l-2 ${
-                              subActive
-                                ? "bg-white/10 text-white border-white font-semibold"
-                                : "text-blue-100 border-transparent hover:bg-white/10 hover:text-white"
-                            }`}
-                          >
-                            <span className="text-blue-300 text-xs">•</span>
-                            <span className="flex-1 truncate">
-                              {subitem.name}
-                            </span>
-                            {subitem.badge && (
-                              <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-50 font-semibold">
-                                {subitem.badge}
-                              </span>
-                            )}
-                          </Link>
-                        );
-                      })}
+                    <div className="ml-2 mt-1 bg-blue-800 rounded-xl border border-blue-700 overflow-hidden">
+                      {item.submenu.map((sub) => (
+                        <Link
+                          key={sub.link}
+                          to={sub.link}
+                          className={`flex items-center gap-3 px-4 py-2 text-sm border-l-2 ${
+                            isPathActive(sub.link)
+                              ? "text-white bg-white/10 border-white font-semibold"
+                              : "text-blue-200 hover:bg-white/10"
+                          }`}
+                        >
+                          • {sub.name}
+                        </Link>
+                      ))}
                     </div>
                   )}
-                </div>
+                </>
               ) : (
                 <Link
                   to={item.link}
-                  className={`${baseClasses} ${stateClasses}`}
+                  className={baseClasses + " " + stateClasses}
                 >
                   {renderIcon(item.icon)}
-                  <span className="flex-1 text-left truncate">{item.name}</span>
+                  <span>{item.name}</span>
                 </Link>
               )}
             </div>
