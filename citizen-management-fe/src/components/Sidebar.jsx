@@ -50,7 +50,16 @@ export default function Sidebar() {
         name: "Quản lý thu phí, đóng góp",
         icon: "💰", // Icon phù hợp với mục này
         submenu: [
-          { name: "Danh sách thu phí", link: "/fee-management/list" },
+          { name: "Danh sách thu phí", link: "/fee-management/types" },
+          { name: "Thu phí theo loại", link: "/fee-management/type/:typeId" },
+          {
+            name: "Thu phí theo hộ khẩu",
+            link: "/fee-management/type/:typeId/household/:householdId",
+          },
+          {
+            name: "Lịch sử thu phí",
+            link: "/fee-management/household/:householdId/history",
+          },
           { name: "Đóng góp", link: "/fee-management/contribute" },
         ],
       },

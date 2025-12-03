@@ -14,8 +14,12 @@ import ResidentsSearch from "./pages/ResidentsSearch";
 import AccountInfo from "./pages/AccountInfo";
 import AccountEdit from "./pages/AccountEdit";
 import ChangePassword from "./pages/ChangePassword";
-import QuanLiThuPhi from "./pages/CollectFees";
-import QuanLiDongGop from "./pages/Contribute";
+import FeeTypeList from "./pages/FeeTypeList";
+import FeeCollectionByType from "./pages/FeeCollectionByType";
+import FeeHouseholdDetail from "./pages/FeeHouseHoldDetail";
+import FeeHistoryByHousehold from "./pages/FeeHistoryByHousehold";
+import ContributionList from "./pages/ContributionList";
+import ContributionDetail from "./pages/ContributionDetail";
 export default function App() {
   return (
     <Routes>
@@ -43,8 +47,24 @@ export default function App() {
       <Route path="/account" element={<AccountInfo />} />
       <Route path="/account/edit" element={<AccountEdit />} />
       <Route path="/account/change-password" element={<ChangePassword />} />
-      <Route path="/fee-management/list" element={<QuanLiThuPhi />} />
-      <Route path="/fee-management/contribute" element={<QuanLiDongGop />} />
+      <Route path="/fee-management/types" element={<FeeTypeList />} />
+      <Route
+        path="/fee-management/type/:typeId"
+        element={<FeeCollectionByType />}
+      />
+      <Route
+        path="/fee-management/type/:typeId/household/:householdId"
+        element={<FeeHouseholdDetail />}
+      />
+      <Route
+        path="/fee-management/household/:householdId/history"
+        element={<FeeHistoryByHousehold />}
+      />
+      <Route path="/fee-management/contribute" element={<ContributionList />} />
+      <Route
+        path="/fee-management/contribute/:campaignId"
+        element={<ContributionDetail />}
+      />
     </Routes>
   );
 }
