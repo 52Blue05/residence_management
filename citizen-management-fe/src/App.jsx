@@ -12,10 +12,10 @@ import HouseholdByArea from "./pages/HouseholdByArea";
 import ResidentsAdd from "./pages/ResidentsAdd";
 import ResidentsSearch from "./pages/ResidentsSearch";
 import AccountInfo from "./pages/AccountInfo";
+import AccountEdit from "./pages/AccountEdit";
 import ChangePassword from "./pages/ChangePassword";
 import QuanLiThuPhi from "./pages/CollectFees";
 import QuanLiDongGop from "./pages/Contribute";
-
 export default function App() {
   return (
     <Routes>
