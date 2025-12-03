@@ -134,3 +134,6 @@ export const residentPool = [
   { id: "NK-010", name: "Tạ Thị Ngọc", cccd: "012345678910", dob: "1972-07-14" }
 ];
 
+
+
+

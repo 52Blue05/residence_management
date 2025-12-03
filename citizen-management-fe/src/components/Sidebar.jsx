@@ -58,6 +58,19 @@ export default function Sidebar() {
       type: 'single'
     },
     {
+      id: 'fees', name: 'Quản lý Thu - Chi', icon: '💰', submenu: [
+        { name: 'Phí vệ sinh', link: '/fees/sanitation', description: 'Danh sách thu phí vệ sinh' },
+        { name: 'Lập phiếu thu', link: '/fees/sanitation/collect', description: 'Thu phí vệ sinh' },
+        { name: 'Thống kê theo năm', link: '/fees/sanitation/statistics', description: 'Báo cáo phí vệ sinh' },
+        { name: 'Hộ chưa đóng', link: '/fees/sanitation/unpaid', description: 'Danh sách hộ chưa nộp' },
+        { name: 'Đóng góp tự nguyện', link: '/donations/campaigns', description: 'Các đợt đóng góp' },
+        { name: 'Tạo đợt mới', link: '/donations/campaigns/create', description: 'Tạo đợt đóng góp' },
+        { name: 'Thu đóng góp', link: '/donations/collect', description: 'Thu tiền đóng góp' },
+        { name: 'Báo cáo tổng hợp', link: '/fees/reports/monthly', description: 'Tổng thu theo tháng' },
+        { name: 'Cài đặt định mức', link: '/fees/settings/sanitation-rate', description: 'Định mức phí vệ sinh' }
+      ]
+    },
+    {
       id: 'baocao', name: 'Báo cáo & Thống kê', icon: '📈', submenu: [
         { name: 'Báo cáo dân số', link: '/baocao/danso' },
         { name: 'Báo cáo sinh viên', link: '/baocao/sinhvien' },
@@ -67,6 +80,7 @@ export default function Sidebar() {
     },
     {
       id: 'tailieu', name: 'Quản lý Tài liệu', icon: '📁', submenu: [
+        { name: 'Cấp giấy', link: '/tailieu/cap-giay' },
         { name: 'Upload tài liệu', link: '/tailieu/upload' },
         { name: 'Thư viện file', link: '/tailieu/thu-vien' },
         { name: 'Mẫu biểu', link: '/tailieu/mau-bieu' }

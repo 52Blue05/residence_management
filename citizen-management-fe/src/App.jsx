@@ -7,12 +7,18 @@ import TemporaryResidents from "./pages/TemporaryResidents";
 import UserManagement from "./pages/UserManagement";
 import SystemSettings from "./pages/SystemSettings";
 import Help from "./pages/Help";
+import CapGiay from "./pages/CapGiay";
 import HouseholdAdd from "./pages/HouseholdAdd";
 import HouseholdByArea from "./pages/HouseholdByArea";
 import ResidentsAdd from "./pages/ResidentsAdd";
 import ResidentsSearch from "./pages/ResidentsSearch";
 import AccountInfo from "./pages/AccountInfo";
 import ChangePassword from "./pages/ChangePassword";
+import SanitationFeesList from "./pages/SanitationFeesList";
+import SanitationFeeCollect from "./pages/SanitationFeeCollect";
+import DonationCampaigns from "./pages/DonationCampaigns";
+import DonationCampaignCreate from "./pages/DonationCampaignCreate";
+import SanitationFeeSettings from "./pages/SanitationFeeSettings";
 
 export default function App() {
   return (
@@ -36,10 +42,16 @@ export default function App() {
       <Route path="/tamtru" element={<TemporaryResidents />} />
       <Route path="/caidat/nguoi-dung" element={<UserManagement />} />
       <Route path="/admin/users" element={<UserManagement />} />
+      <Route path="/tailieu/cap-giay" element={<CapGiay />} />
       <Route path="/caidat/he-thong" element={<SystemSettings />} />
       <Route path="/help" element={<Help />} />
       <Route path="/account" element={<AccountInfo />} />
       <Route path="/account/change-password" element={<ChangePassword />} />
+      <Route path="/fees/sanitation" element={<SanitationFeesList />} />
+      <Route path="/fees/sanitation/collect" element={<SanitationFeeCollect />} />
+      <Route path="/fees/settings/sanitation-rate" element={<SanitationFeeSettings />} />
+      <Route path="/donations/campaigns" element={<DonationCampaigns />} />
+      <Route path="/donations/campaigns/create" element={<DonationCampaignCreate />} />
     </Routes>
   );
 }

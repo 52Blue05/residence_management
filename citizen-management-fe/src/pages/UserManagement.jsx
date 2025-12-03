@@ -65,6 +65,10 @@ export default function UserManagement() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState(defaultForm);
   const [formErrors, setFormErrors] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState(null);
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -112,6 +116,20 @@ export default function UserManagement() {
     alert(`User ${formData.username} đã được tạo${formData.sendEmail ? " và gửi email thông báo (giả lập)" : ""}.`);
     setFormData(defaultForm);
     setShowCreateModal(false);
+  };
+
+  const resetPassword = (user) => {
+    const confirmed = window.confirm(`Bạn có chắc muốn đặt lại mật khẩu cho ${user.username} không?`);
+    if (!confirmed) return;
+    const temp = "Pass@1234";
+    // In a real app, call API to reset; here we simulate
+    alert(`Mật khẩu tạm thời cho ${user.username} là: ${temp} (giả lập)`);
+  };
+
+  const toggleUserStatus = (user) => {
+    const next = users.map(u => u.id === user.id ? { ...u, status: u.status === 'active' ? 'pending' : 'active' } : u);
+    setUsers(next);
+    alert('Cập nhật trạng thái thành công (giả lập)');
   };
 
   return (
@@ -251,13 +269,13 @@ export default function UserManagement() {
                               <div className="flex justify-center gap-2">
                                 <button
                                   className="text-xs px-3 py-2 rounded-lg bg-blue-500/10 text-blue-300 border border-blue-400/30"
-                                  onClick={() => alert("Chức năng xem chi tiết đang phát triển")}
+                                  onClick={() => { setSelectedUser(user); setShowViewModal(true); }}
                                 >
                                   Xem
                                 </button>
                                 <button
                                   className="text-xs px-3 py-2 rounded-lg bg-yellow-500/10 text-yellow-300 border border-yellow-400/30"
-                                  onClick={() => alert("Chức năng chỉnh sửa đang phát triển")}
+                                  onClick={() => { setSelectedUser(user); setEditForm({ ...user }); setShowEditModal(true); }}
                                 >
                                   Sửa
                                 </button>
@@ -364,6 +382,58 @@ export default function UserManagement() {
           </div>
         </div>
       )}
+
+      {showViewModal && selectedUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowViewModal(false)} />
+          <div className="relative bg-gray-900 rounded-3xl border border-white/5 w-full max-w-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Chi tiết người dùng</h3>
+              <button onClick={() => setShowViewModal(false)} className="text-gray-400">✕</button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-200">
+              <div><p className="text-xs text-gray-400">Username</p><p className="font-medium">{selectedUser.username}</p></div>
+              <div><p className="text-xs text-gray-400">Họ tên</p><p className="font-medium">{selectedUser.fullName}</p></div>
+              <div><p className="text-xs text-gray-400">Email</p><p className="font-medium">{selectedUser.email}</p></div>
+              <div><p className="text-xs text-gray-400">SĐT</p><p className="font-medium">{selectedUser.phone || '—'}</p></div>
+              <div><p className="text-xs text-gray-400">Quyền</p><p className="font-medium">{selectedUser.role}</p></div>
+              <div><p className="text-xs text-gray-400">Trạng thái</p><p className="font-medium">{selectedUser.status === 'active' ? 'Đang hoạt động' : 'Chờ kích hoạt'}</p></div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => { resetPassword(selectedUser); }} className="px-4 py-2 rounded-xl bg-yellow-600 text-white">Đặt lại mật khẩu</button>
+              <button onClick={() => { toggleUserStatus(selectedUser); }} className={`px-4 py-2 rounded-xl ${selectedUser.status === 'active' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'}`}>
+                {selectedUser.status === 'active' ? 'Vô hiệu hóa' : 'Kích hoạt'}
+              </button>
+              <button onClick={() => setShowViewModal(false)} className="px-4 py-2 rounded-xl bg-gray-800 text-gray-200">Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && editForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowEditModal(false)} />
+          <div className="relative bg-gray-900 rounded-3xl border border-white/5 w-full max-w-3xl p-6 shadow-2xl overflow-auto max-h-[90vh]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">Chỉnh sửa người dùng</h3>
+              <button onClick={() => setShowEditModal(false)} className="text-gray-400">✕</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-200">
+              <label className="text-sm text-gray-300">Username<input value={editForm.username} onChange={(e) => setEditForm({ ...editForm, username: e.target.value })} className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2" /></label>
+              <label className="text-sm text-gray-300">Họ tên<input value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2" /></label>
+              <label className="text-sm text-gray-300">Email<input value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2" /></label>
+              <label className="text-sm text-gray-300">SĐT<input value={editForm.phone || ''} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2" /></label>
+              <label className="text-sm text-gray-300">Quyền<select value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })} className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2">{roles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}</select></label>
+              <label className="text-sm text-gray-300">Trạng thái<select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2"><option value="active">Đang hoạt động</option><option value="pending">Chờ kích hoạt</option></select></label>
+            </div>
+            <div className="mt-6 flex gap-3 justify-end">
+              <button onClick={() => { setUsers(users.map(u => u.id === editForm.id ? { ...u, ...editForm } : u)); setShowEditModal(false); alert('Cập nhật thông tin thành công'); }} className="px-4 py-2 rounded-xl bg-emerald-600 text-white">Lưu</button>
+              <button onClick={() => setShowEditModal(false)} className="px-4 py-2 rounded-xl bg-gray-800 text-gray-200">Hủy</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
