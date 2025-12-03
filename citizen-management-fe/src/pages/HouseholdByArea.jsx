@@ -19,8 +19,13 @@ export default function HouseholdByArea() {
 
   const areaStats = useMemo(() => {
     return areaMeta.map((area) => {
-      const households = householdRecords.filter((record) => record.area === area.id);
-      const residents = households.reduce((sum, record) => sum + record.members, 0);
+      const households = householdRecords.filter(
+        (record) => record.area === area.id
+      );
+      const residents = households.reduce(
+        (sum, record) => sum + record.members,
+        0
+      );
       return {
         ...area,
         households,
@@ -49,10 +54,15 @@ export default function HouseholdByArea() {
             <div className="w-full h-full p-6 md:p-8 space-y-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">Analytics</p>
-                  <h1 className="text-3xl font-semibold text-white">Tìm kiếm hộ khẩu theo Tổ dân phố</h1>
+                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">
+                    Analytics
+                  </p>
+                  <h1 className="text-3xl font-semibold text-white">
+                    Tìm kiếm hộ khẩu theo Tổ dân phố
+                  </h1>
                   <p className="text-gray-300 mt-1 max-w-2xl">
-                    Chọn một tổ dân phố để xem danh sách hộ khẩu cùng số lượng nhân khẩu tương ứng.
+                    Chọn một tổ dân phố để xem danh sách hộ khẩu cùng số lượng
+                    nhân khẩu tương ứng.
                   </p>
                 </div>
                 <button
@@ -69,15 +79,25 @@ export default function HouseholdByArea() {
                     key={area.id}
                     onClick={() => setActiveArea(area.id)}
                     className={`rounded-3xl p-5 text-left border transition shadow-lg shadow-black/30 ${
-                      activeArea === area.id ? "border-white/50 bg-white/10" : "border-white/10 bg-gray-900/80 hover:border-white/30"
+                      activeArea === area.id
+                        ? "border-white/50 bg-white/10"
+                        : "border-white/10 bg-gray-900/80 hover:border-white/30"
                     }`}
                   >
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${area.gradient} flex items-center justify-center text-white mb-4`}>
+                    <div
+                      className={`w-12 h-12 rounded-2xl bg-linear-to-br ${area.gradient} flex items-center justify-center text-white mb-4`}
+                    >
                       <MapPinned className="w-6 h-6" />
                     </div>
-                    <p className="text-sm uppercase tracking-wide text-gray-400">{area.name}</p>
-                    <p className="text-3xl font-bold text-white mt-2">{area.householdsCount} hộ</p>
-                    <p className="text-xs text-gray-400 mt-1">{area.residentsCount} nhân khẩu</p>
+                    <p className="text-sm uppercase tracking-wide text-gray-400">
+                      {area.name}
+                    </p>
+                    <p className="text-3xl font-bold text-white mt-2">
+                      {area.householdsCount} hộ
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {area.residentsCount} nhân khẩu
+                    </p>
                   </button>
                 ))}
               </section>
@@ -91,16 +111,25 @@ export default function HouseholdByArea() {
                     </h2>
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-200">
                       <div className="rounded-2xl border border-white/10 p-4">
-                        <p className="text-xs uppercase text-gray-400">Số hộ khẩu</p>
-                        <p className="text-2xl font-semibold text-white mt-2">{selectedArea.householdsCount}</p>
+                        <p className="text-xs uppercase text-gray-400">
+                          Số hộ khẩu
+                        </p>
+                        <p className="text-2xl font-semibold text-white mt-2">
+                          {selectedArea.householdsCount}
+                        </p>
                       </div>
                       <div className="rounded-2xl border border-white/10 p-4">
-                        <p className="text-xs uppercase text-gray-400">Nhân khẩu</p>
-                        <p className="text-2xl font-semibold text-white mt-2">{selectedArea.residentsCount}</p>
+                        <p className="text-xs uppercase text-gray-400">
+                          Nhân khẩu
+                        </p>
+                        <p className="text-2xl font-semibold text-white mt-2">
+                          {selectedArea.residentsCount}
+                        </p>
                       </div>
                     </div>
                     <p className="text-xs text-gray-400">
-                      Dữ liệu được tổng hợp dựa trên hộ khẩu đã đăng ký chính thức trong khu vực {selectedArea.name}.
+                      Dữ liệu được tổng hợp dựa trên hộ khẩu đã đăng ký chính
+                      thức trong khu vực {selectedArea.name}.
                     </p>
                   </div>
 
@@ -112,22 +141,37 @@ export default function HouseholdByArea() {
                     <div className="space-y-3 max-h-[480px] overflow-y-auto pr-2">
                       {selectedArea.households.length ? (
                         selectedArea.households.map((record) => (
-                          <div key={record.id} className="rounded-2xl border border-white/10 p-4 flex flex-col gap-1">
+                          <div
+                            key={record.id}
+                            className="rounded-2xl border border-white/10 p-4 flex flex-col gap-1"
+                          >
                             <div className="flex items-center justify-between">
-                              <p className="text-white font-semibold">{record.headName}</p>
-                              <span className="text-xs text-gray-400">{record.id}</span>
+                              <p className="text-white font-semibold">
+                                {record.headName}
+                              </p>
+                              <span className="text-xs text-gray-400">
+                                {record.id}
+                              </span>
                             </div>
-                            <p className="text-xs text-gray-500">{record.address}</p>
+                            <p className="text-xs text-gray-500">
+                              {record.address}
+                            </p>
                             <div className="flex items-center gap-3 text-xs text-gray-300 mt-2">
-                              <span className="px-2 py-0.5 rounded-full bg-white/10 text-white">{record.members} nhân khẩu</span>
+                              <span className="px-2 py-0.5 rounded-full bg-white/10 text-white">
+                                {record.members} nhân khẩu
+                              </span>
                               <span className="text-gray-400">
-                                {new Date(record.registeredAt).toLocaleDateString("vi-VN")}
+                                {new Date(
+                                  record.registeredAt
+                                ).toLocaleDateString("vi-VN")}
                               </span>
                             </div>
                           </div>
                         ))
                       ) : (
-                        <p className="text-sm text-gray-400">Chưa có dữ liệu hộ khẩu cho tổ này.</p>
+                        <p className="text-sm text-gray-400">
+                          Chưa có dữ liệu hộ khẩu cho tổ này.
+                        </p>
                       )}
                     </div>
                   </div>
@@ -140,4 +184,3 @@ export default function HouseholdByArea() {
     </div>
   );
 }
-

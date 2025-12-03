@@ -13,6 +13,8 @@ import ResidentsAdd from "./pages/ResidentsAdd";
 import ResidentsSearch from "./pages/ResidentsSearch";
 import AccountInfo from "./pages/AccountInfo";
 import ChangePassword from "./pages/ChangePassword";
+import QuanLiThuPhi from "./pages/CollectFees";
+import QuanLiDongGop from "./pages/Contribute";
 
 export default function App() {
   return (
@@ -39,7 +41,10 @@ export default function App() {
       <Route path="/caidat/he-thong" element={<SystemSettings />} />
       <Route path="/help" element={<Help />} />
       <Route path="/account" element={<AccountInfo />} />
+      <Route path="/account/edit" element={<AccountEdit />} />
       <Route path="/account/change-password" element={<ChangePassword />} />
+      <Route path="/fee-management/list" element={<QuanLiThuPhi />} />
+      <Route path="/fee-management/contribute" element={<QuanLiDongGop />} />
     </Routes>
   );
 }
