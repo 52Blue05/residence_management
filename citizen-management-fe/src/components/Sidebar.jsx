@@ -32,6 +32,7 @@ export default function Sidebar() {
       submenu: [
         { name: 'Danh sách hộ khẩu', link: '/households', description: 'Xem toàn bộ hộ khẩu trong phường' },
         { name: 'Thêm hộ khẩu mới', link: '/households/add', description: 'Đăng ký hộ khẩu mới' },
+        { name: 'Thay đổi chủ hộ', link: '/households/change-head', description: 'Cập nhật chủ hộ mới cho hộ khẩu' },
         { name: 'Tìm kiếm theo tổ DP', link: '/households/by-area', description: 'Xem hộ khẩu theo 7 tổ dân phố' }
       ]
     },

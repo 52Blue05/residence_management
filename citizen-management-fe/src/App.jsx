@@ -19,6 +19,7 @@ import SanitationFeeCollect from "./pages/SanitationFeeCollect";
 import DonationCampaigns from "./pages/DonationCampaigns";
 import DonationCampaignCreate from "./pages/DonationCampaignCreate";
 import SanitationFeeSettings from "./pages/SanitationFeeSettings";
+import ChangeHouseholdHead from "./pages/ChangeHouseholdHead";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/households" element={<QuanLiHoKhau />} />
       <Route path="/households/add" element={<HouseholdAdd />} />
+      <Route path="/households/change-head" element={<ChangeHouseholdHead />} />
       <Route path="/households/by-area" element={<HouseholdByArea />} />
       <Route path="/hokhau/danh-sach" element={<QuanLiHoKhau />} />
       <Route path="/hokhau/them-moi" element={<HouseholdAdd />} />

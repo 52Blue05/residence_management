@@ -75,7 +75,7 @@ export default function CapGiay() {
                       </select>
                     </label>
 
-                    <label className="text-sm text-gray-700">
+                    <label className="text-sm text-gray-7">
                       Họ và tên
                       <input name="hoTen" value={form.hoTen} onChange={handleChange} className="mt-2 w-full rounded-md border p-2" />
                     </label>
