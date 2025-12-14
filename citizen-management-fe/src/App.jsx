@@ -20,6 +20,9 @@ import DonationCampaigns from "./pages/DonationCampaigns";
 import DonationCampaignCreate from "./pages/DonationCampaignCreate";
 import SanitationFeeSettings from "./pages/SanitationFeeSettings";
 import ChangeHouseholdHead from "./pages/ChangeHouseholdHead";
+import FeeTypesManagement from "./pages/FeeTypesManagement";
+import FeeCollectionManagement from "./pages/FeeCollectionManagement";
+import CollectionPeriodsManagement from "./pages/CollectionPeriodsManagement";
 
 export default function App() {
   return (
@@ -49,6 +52,9 @@ export default function App() {
       <Route path="/help" element={<Help />} />
       <Route path="/account" element={<AccountInfo />} />
       <Route path="/account/change-password" element={<ChangePassword />} />
+      <Route path="/fees/types" element={<FeeTypesManagement />} />
+      <Route path="/fees/periods" element={<CollectionPeriodsManagement />} />
+      <Route path="/fees/collection" element={<FeeCollectionManagement />} />
       <Route path="/fees/sanitation" element={<SanitationFeesList />} />
       <Route path="/fees/sanitation/collect" element={<SanitationFeeCollect />} />
       <Route path="/fees/settings/sanitation-rate" element={<SanitationFeeSettings />} />

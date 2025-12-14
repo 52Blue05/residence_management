@@ -60,6 +60,9 @@ export default function Sidebar() {
     },
     {
       id: 'fees', name: 'Quản lý Thu - Chi', icon: '💰', submenu: [
+        { name: 'Quản lý các loại phí', link: '/fees/types', description: 'Danh sách và quản lý các loại phí' },
+        { name: 'Quản lý các đợt thu phí', link: '/fees/periods', description: 'Danh sách và quản lý các đợt thu phí' },
+        { name: 'Quản lý thu phí', link: '/fees/collection', description: 'Danh sách và quản lý các khoản thu phí' },
         { name: 'Phí vệ sinh', link: '/fees/sanitation', description: 'Danh sách thu phí vệ sinh' },
         { name: 'Lập phiếu thu', link: '/fees/sanitation/collect', description: 'Thu phí vệ sinh' },
         { name: 'Thống kê theo năm', link: '/fees/sanitation/statistics', description: 'Báo cáo phí vệ sinh' },
