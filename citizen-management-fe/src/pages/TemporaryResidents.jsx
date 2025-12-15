@@ -1,312 +1,265 @@
-import { useMemo, useState } from "react";
-import {
-  CalendarClock,
-  Clock3,
-  MapPin,
-  Phone,
-  PlusCircle,
-  RefreshCw,
-  ShieldCheck,
-  UserCheck,
-} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarClock, MapPin, Phone, PlusCircle, RefreshCw, ShieldCheck, UserCheck, Clock3, Search, Eye } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Header from "../headers/Header";
 
-const initialResidents = [
-  {
-    id: "TT-001",
-    fullName: "Nguyễn Thị Hạnh",
-    gender: "Nữ",
-    hometown: "Thanh Hóa",
-    stayAddress: "12 Ngách 5/34 Văn Khê",
-    landlord: "Đỗ Văn Nam",
-    phone: "0912 345 678",
-    startDate: "2024-11-12",
-    endDate: "2025-05-12",
-    status: "active",
-    purpose: "Chuyên viên Marketing",
-    note: "Thuê căn hộ 2PN",
-  },
-  {
-    id: "TT-002",
-    fullName: "Trịnh Văn Tài",
-    gender: "Nam",
-    hometown: "Nghệ An",
-    stayAddress: "Tòa S2.05 Sunshine City",
-    landlord: "Lê Huyền",
-    phone: "0987 444 222",
-    startDate: "2024-07-01",
-    endDate: "2025-01-18",
-    status: "expiring",
-    purpose: "Kỹ sư kết cấu",
-    note: "Gia hạn 6 tháng",
-  },
-  {
-    id: "TT-003",
-    fullName: "Lê Đức Phú",
-    gender: "Nam",
-    hometown: "Đà Nẵng",
-    stayAddress: "01 BT08, KĐT Geleximco",
-    landlord: "Nguyễn Hải",
-    phone: "0903 888 123",
-    startDate: "2023-09-07",
-    endDate: "2024-09-06",
-    status: "completed",
-    purpose: "Sinh viên Kiến trúc",
-    note: "Đã chuyển về quê",
-  },
-  {
-    id: "TT-004",
-    fullName: "Trần Mỹ Duyên",
-    gender: "Nữ",
-    hometown: "Quảng Ninh",
-    stayAddress: "B3-12 Roman Plaza",
-    landlord: "Phạm Quảng",
-    phone: "0979 120 333",
-    startDate: "2024-03-20",
-    endDate: "2025-03-20",
-    status: "active",
-    purpose: "Quản lý Spa",
-    note: "Cần kiểm tra giấy bảo lãnh",
-  },
-];
+const API_BASE = "http://localhost:8080/api";
 
-const statusConfig = {
-  active: {
-    label: "Đang tạm trú",
-    className: "text-green-300 bg-green-500/10 border border-green-500/40",
-  },
-  expiring: {
-    label: "Sắp hết hạn",
-    className: "text-yellow-200 bg-yellow-400/10 border border-yellow-400/40",
-  },
-  completed: {
-    label: "Đã kết thúc",
-    className: "text-gray-300 bg-gray-500/10 border border-gray-500/30",
-  },
-};
-
-const quickActions = [
-  {
-    id: "register",
-    title: "Đăng ký tạm trú mới",
-    description: "Tiếp nhận hồ sơ đăng ký và phát sinh hợp đồng thuê mới",
-    icon: PlusCircle,
-    accent: "from-blue-500 to-indigo-500",
-  },
-  {
-    id: "extend",
-    title: "Gia hạn tạm trú",
-    description: "Cập nhật thời hạn cư trú và giấy tờ liên quan",
-    icon: RefreshCw,
-    accent: "from-amber-500 to-yellow-500",
-  },
-  {
-    id: "complete",
-    title: "Kết thúc tạm trú",
-    description: "Hoàn tất thủ tục trả nhà và xác nhận cư trú",
-    icon: ShieldCheck,
-    accent: "from-emerald-500 to-teal-500",
-  },
-];
-
-const timeline = [
-  {
-    title: "Gia hạn cư trú",
-    resident: "Trịnh Văn Tài",
-    date: "18/01/2025",
-    status: "Đang xử lý",
-    type: "extend",
-  },
-  {
-    title: "Tiếp nhận mới",
-    resident: "Đặng Thùy Anh",
-    date: "15/12/2024",
-    status: "Hoàn tất",
-    type: "register",
-  },
-  {
-    title: "Kết thúc cư trú",
-    resident: "Lê Đức Phú",
-    date: "06/09/2024",
-    status: "Đã xác nhận",
-    type: "complete",
-  },
-];
-
-const defaultForm = {
-  fullName: "",
-  idNumber: "",
-  landlord: "",
-  phone: "",
-  stayAddress: "",
-  startDate: "",
-  endDate: "",
-  note: "",
-  targetId: "",
-};
-
-const generateResidentId = (list) => {
-  const highest = list.reduce((acc, resident) => {
-    const value = Number((resident.id || "").replace("TT-", "")) || 0;
-    return Math.max(acc, value);
-  }, 0);
-  return `TT-${String(highest + 1).padStart(3, "0")}`;
-};
-
-const monthsBetween = (start, end) => {
-  const diff = new Date(end) - new Date(start);
-  return Math.max(1, Math.round(diff / (1000 * 60 * 60 * 24 * 30)));
+const statusMap = {
+  "Dang tam tru": { label: "Đang tạm trú", className: "text-green-300 bg-green-500/10 border border-green-500/40" },
+  "Da ket thuc": { label: "Đã kết thúc", className: "text-gray-300 bg-gray-500/10 border border-gray-500/30" },
+  default: { label: "—", className: "text-gray-300 bg-gray-500/10 border border-gray-500/30" },
 };
 
 export default function TemporaryResidents() {
-  const [residents, setResidents] = useState(initialResidents);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [durationFilter, setDurationFilter] = useState("");
-  const [activeForm, setActiveForm] = useState(null);
-  const [formData, setFormData] = useState(defaultForm);
-  const [selectedResident, setSelectedResident] = useState(null);
 
-  const stats = useMemo(() => {
-    const now = new Date();
-    const expiringSoon = residents.filter((r) => {
-      if (r.status !== "active") return false;
-      const diffDays = (new Date(r.endDate) - now) / (1000 * 60 * 60 * 24);
-      return diffDays <= 30 && diffDays >= 0;
-    });
-    return {
-      total: residents.length,
-      active: residents.filter((r) => r.status === "active").length,
-      expiring: expiringSoon.length,
-      completed: residents.filter((r) => r.status === "completed").length,
-    };
-  }, [residents]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showExtend, setShowExtend] = useState(false);
+  const [showEnd, setShowEnd] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
+  const [extendSearch, setExtendSearch] = useState("");
+  const [endSearch, setEndSearch] = useState("");
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [extendForm, setExtendForm] = useState({ newDenNgay: "", lyDo: "", ghiChu: "" });
+  const [createForm, setCreateForm] = useState({
+    maNhanKhau: "",
+    noiTamTru: "",
+    tuNgay: "",
+    denNgay: "",
+    lyDo: "",
+    ghiChu: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState("name");
+  const [sortDir, setSortDir] = useState("asc");
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
-  const filteredResidents = useMemo(() => {
-    return residents.filter((resident) => {
-      const matchesSearch =
-        resident.fullName.toLowerCase().includes(search.toLowerCase()) ||
-        resident.id.toLowerCase().includes(search.toLowerCase()) ||
-        resident.stayAddress.toLowerCase().includes(search.toLowerCase());
+  useEffect(() => {
+    fetchList();
+  }, []);
 
-      const matchesStatus =
-        statusFilter === "all" ? true : resident.status === statusFilter;
-
-      let matchesDuration = true;
-      if (durationFilter) {
-        const months = monthsBetween(resident.startDate, resident.endDate);
-        if (durationFilter === "<3") matchesDuration = months < 3;
-        if (durationFilter === "3-6") matchesDuration = months >= 3 && months <= 6;
-        if (durationFilter === ">6") matchesDuration = months > 6;
-      }
-
-      return matchesSearch && matchesStatus && matchesDuration;
-    });
-  }, [residents, search, statusFilter, durationFilter]);
-
-  const upcomingResidences = useMemo(() => {
-    return [...residents]
-      .filter((r) => r.status !== "completed")
-      .sort((a, b) => new Date(a.endDate) - new Date(b.endDate))
-      .slice(0, 4);
-  }, [residents]);
-
-  const openForm = (type, resident = null) => {
-    setActiveForm(type);
-    setSelectedResident(resident || null);
-    if (resident) {
-      setFormData({
-        fullName: resident.fullName,
-        idNumber: "",
-        landlord: resident.landlord,
-        phone: resident.phone,
-        stayAddress: resident.stayAddress,
-        startDate: resident.startDate,
-        endDate: resident.endDate,
-        note: resident.note,
-        targetId: resident.id,
-      });
-    } else {
-      setFormData({ ...defaultForm });
+  const fetchList = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetch(`${API_BASE}/tamtru`);
+      if (!res.ok) throw new Error(`API lỗi: ${res.status}`);
+      const data = await res.json();
+      setRecords(data || []);
+    } catch (err) {
+      console.error(err);
+      setError("Không thể tải danh sách tạm trú. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSubmit = () => {
-    if (!activeForm) return;
+  const monthsBetween = (start, end) => {
+    if (!start || !end) return 0;
+    const diff = new Date(end) - new Date(start);
+    return Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24 * 30)));
+  };
 
-    if (activeForm === "register") {
-      if (!formData.fullName || !formData.startDate || !formData.endDate || !formData.stayAddress) {
-        alert("Vui lòng nhập đầy đủ Họ tên, Địa chỉ, Ngày bắt đầu và Ngày kết thúc.");
-        return;
-      }
-      const newResident = {
-        id: generateResidentId(residents),
-        fullName: formData.fullName,
-        gender: "—",
-        hometown: "—",
-        stayAddress: formData.stayAddress,
-        landlord: formData.landlord || "—",
-        phone: formData.phone || "—",
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        status: "active",
-        purpose: "Tạm trú mới",
-        note: formData.note || "",
-      };
-      setResidents((prev) => [newResident, ...prev]);
-      alert("Đăng ký tạm trú mới đã được lưu (mô phỏng).");
-    } else {
-      const target =
-        selectedResident ||
-        residents.find((resident) => resident.id === formData.targetId);
-      if (!target) {
-        alert("Vui lòng chọn cư dân cần xử lý.");
-        return;
-      }
+  const [durationFilter, setDurationFilter] = useState("all");
 
-      if (activeForm === "extend") {
-        if (!formData.endDate) {
-          alert("Vui lòng chọn ngày kết thúc mới để gia hạn.");
-          return;
-        }
-        setResidents((prev) =>
-          prev.map((resident) =>
-            resident.id === target.id
-              ? {
-                  ...resident,
-                  endDate: formData.endDate,
-                  note: formData.note || resident.note,
-                  status: "active",
-                }
-              : resident
-          )
-        );
-        alert(`Đã gia hạn tạm trú cho ${target.fullName} (mô phỏng).`);
-      }
+  const filtered = useMemo(() => {
+    return records.filter((item) => {
+      const name = item.nhanKhau?.hoTen || "";
+      const address = item.noiTamTru || "";
+      const code = item.maTamTru?.toString() || "";
+      const matchesSearch =
+        name.toLowerCase().includes(search.toLowerCase()) ||
+        address.toLowerCase().includes(search.toLowerCase()) ||
+        code.includes(search);
 
-      if (activeForm === "complete") {
-        const endDateValue =
-          formData.endDate || new Date().toISOString().split("T")[0];
-        setResidents((prev) =>
-          prev.map((resident) =>
-            resident.id === target.id
-              ? {
-                  ...resident,
-                  endDate: endDateValue,
-                  note: formData.note || resident.note,
-                  status: "completed",
-                }
-              : resident
-          )
-        );
-        alert(`Đã kết thúc tạm trú cho ${target.fullName} (mô phỏng).`);
+      const months = monthsBetween(item.tuNgay, item.denNgay);
+      let matchesDuration = true;
+      if (durationFilter === "1-2") matchesDuration = months >= 1 && months <= 2;
+      if (durationFilter === "3-6") matchesDuration = months >= 3 && months <= 6;
+      if (durationFilter === ">6") matchesDuration = months > 6;
+
+      return matchesSearch && matchesDuration;
+    });
+  }, [records, search, durationFilter]);
+
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      let aVal = "";
+      let bVal = "";
+      if (sortBy === "name") {
+        aVal = (a.nhanKhau?.hoTen || "").toLowerCase();
+        bVal = (b.nhanKhau?.hoTen || "").toLowerCase();
+      } else if (sortBy === "start") {
+        aVal = a.tuNgay || "";
+        bVal = b.tuNgay || "";
+      } else if (sortBy === "end") {
+        aVal = a.denNgay || "";
+        bVal = b.denNgay || "";
       }
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [filtered, sortBy, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const paginated = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return sorted.slice(start, start + pageSize);
+  }, [sorted, page]);
+
+  const extendCandidates = useMemo(() => {
+    return filtered.filter((r) => {
+      const byName = (r.nhanKhau?.hoTen || "").toLowerCase().includes(extendSearch.toLowerCase());
+      const byDuration = durationDays(r.tuNgay, r.denNgay) < 30;
+      return byName && byDuration;
+    });
+  }, [filtered, extendSearch]);
+
+  const endCandidates = useMemo(() => {
+    return filtered.filter((r) => {
+      const byName = (r.nhanKhau?.hoTen || "").toLowerCase().includes(endSearch.toLowerCase());
+      const byStatus = r.trangThai === "Dang tam tru";
+      return byName && byStatus;
+    });
+  }, [filtered, endSearch]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [search, durationFilter, sortBy, sortDir]);
+
+  const statsOverview = useMemo(() => {
+    const total = records.length;
+    const active = records.filter((r) => r.trangThai === "Dang tam tru").length;
+    const ended = records.filter((r) => r.trangThai === "Da ket thuc").length;
+    const needExtend = records.filter((r) => durationDays(r.tuNgay, r.denNgay) < 30 && r.trangThai === "Dang tam tru").length;
+    return { total, active, ended, needExtend };
+  }, [records]);
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!createForm.maNhanKhau || !createForm.noiTamTru || !createForm.tuNgay || !createForm.denNgay || !createForm.lyDo) {
+      alert("Vui lòng nhập đủ Mã nhân khẩu, Nơi tạm trú, Từ ngày, Đến ngày, Lý do.");
+      return;
     }
+    setSubmitting(true);
+    try {
+      const res = await fetch(`${API_BASE}/nhankhau/tam-tru`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          maNhanKhau: Number(createForm.maNhanKhau),
+          noiTamTru: createForm.noiTamTru,
+          tuNgay: createForm.tuNgay,
+          denNgay: createForm.denNgay,
+          lyDo: createForm.lyDo,
+          ghiChu: createForm.ghiChu || "",
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `API lỗi: ${res.status}`);
+      }
+      alert("Đăng ký tạm trú thành công.");
+      setShowCreate(false);
+      setCreateForm({ maNhanKhau: "", noiTamTru: "", tuNgay: "", denNgay: "", lyDo: "", ghiChu: "" });
+      fetchList();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Không thể đăng ký tạm trú.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-    setActiveForm(null);
-    setFormData(defaultForm);
-    setSelectedResident(null);
+  const handleExtend = async (e) => {
+    e.preventDefault();
+    if (!selectedRecord) return;
+    if (!extendForm.newDenNgay) {
+      alert("Vui lòng chọn ngày gia hạn.");
+      return;
+    }
+    const startDate = selectedRecord.tuNgay ? new Date(selectedRecord.tuNgay) : null;
+    const newDate = new Date(extendForm.newDenNgay);
+    const now = new Date();
+    if ((startDate && newDate <= startDate) || newDate <= now) {
+      alert("Ngày gia hạn phải sau ngày hiện tại và sau ngày bắt đầu tạm trú.");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const idTamTru = selectedRecord.maTamTru;
+      const res = await fetch(`${API_BASE}/tamtru/${idTamTru}/giahan`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          newDenNgay: extendForm.newDenNgay,
+          lyDo: extendForm.lyDo || "",
+          ghiChu: extendForm.ghiChu || "",
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `API lỗi: ${res.status}`);
+      }
+      alert("Gia hạn tạm trú thành công.");
+      setShowExtend(false);
+      setExtendForm({ newDenNgay: "", lyDo: "", ghiChu: "" });
+      fetchList();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Không thể gia hạn tạm trú.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEnd = async (record) => {
+    if (!confirm(`Kết thúc tạm trú cho ${record.nhanKhau?.hoTen}?`)) return;
+    try {
+      const idTamTru = record.maTamTru;
+      const res = await fetch(`${API_BASE}/tamtru/${idTamTru}/ketthuc`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error(`API lỗi: ${res.status}`);
+      alert("Đã kết thúc tạm trú.");
+      fetchList();
+    } catch (err) {
+      console.error(err);
+      alert("Không thể kết thúc tạm trú.");
+    }
+  };
+
+  const formatDate = (value) => {
+    if (!value) return "—";
+    return new Date(value).toLocaleDateString("vi-VN");
+  };
+
+  const formatDateRange = (from, to) => {
+    if (!from && !to) return "—";
+    return `${formatDate(from)} → ${formatDate(to)}`;
+  };
+
+  function durationDays(from, to) {
+    if (!from || !to) return Infinity;
+    return Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24));
+  }
+
+  const getStatusBadge = (trangThai) => {
+    const map = statusMap[trangThai] || statusMap.default;
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${map.className}`}>
+        {map.label}
+      </span>
+    );
   };
 
   return (
@@ -321,10 +274,8 @@ export default function TemporaryResidents() {
 
       <div className="flex h-screen w-screen relative z-10 bg-black/30 backdrop-blur-sm">
         <Sidebar />
-
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header />
-
           <main className="flex-1 overflow-auto">
             <div className="w-full h-full p-6 md:p-8 space-y-8">
               <div className="flex items-center justify-between flex-wrap gap-4">
@@ -332,60 +283,103 @@ export default function TemporaryResidents() {
                   <p className="text-sm uppercase tracking-[0.2em] text-blue-200">Module</p>
                   <h1 className="text-3xl font-semibold text-white flex items-center gap-3">
                     <UserCheck className="w-8 h-8 text-blue-300" />
-                    Trung tâm Tạm trú
+                    Quản lý tạm trú
                   </h1>
                   <p className="text-gray-300 mt-1 max-w-2xl">
-                    Giám sát cư dân thuê nhà, gia hạn và kết thúc tạm trú với giao diện hiện đại, đảm bảo tuân thủ quy định cư trú.
+                    Danh sách cư dân tạm trú, gia hạn và kết thúc theo API.
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-wrap gap-3">
                   <button
-                    onClick={() => openForm("register")}
-                    className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-lg font-medium shadow-lg shadow-blue-600/30"
+                    onClick={() => {
+                      setShowCreate(true);
+                      setCreateForm({ maNhanKhau: "", noiTamTru: "", tuNgay: "", denNgay: "", lyDo: "", ghiChu: "" });
+                    }}
+                    className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-3 rounded-xl font-semibold shadow-lg shadow-blue-600/30 flex items-center gap-3 text-sm"
                   >
-                    + Đăng ký ngay
+                    <span className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                      <PlusCircle className="w-6 h-6" />
+                    </span>
+                    Đăng ký mới
                   </button>
                   <button
-                    onClick={() => openForm("extend")}
-                    className="bg-emerald-600/20 text-emerald-200 border border-emerald-500/30 px-5 py-3 rounded-lg font-medium"
+                    onClick={() => {
+                      setSelectedRecord(null);
+                      setExtendSearch("");
+                      setExtendForm({ newDenNgay: "", lyDo: "", ghiChu: "" });
+                      setShowExtend(true);
+                    }}
+                    className="bg-emerald-600/20 text-emerald-200 border border-emerald-500/40 px-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm"
                   >
+                    <span className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <RefreshCw className="w-6 h-6" />
+                    </span>
                     Gia hạn nhanh
+                  </button>
+                  <button
+                    onClick={() => {
+                      setSelectedRecord(null);
+                      setEndSearch("");
+                      setShowEnd(true);
+                    }}
+                    className="bg-red-600/20 text-red-200 border border-red-500/40 px-5 py-3 rounded-xl font-semibold flex items-center gap-3 text-sm"
+                  >
+                    <span className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+                      <ShieldCheck className="w-6 h-6" />
+                    </span>
+                    Kết thúc nhanh
                   </button>
                 </div>
               </div>
 
-              <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[
-                  { label: "Tổng tạm trú", value: stats.total, color: "from-blue-500 to-indigo-600" },
-                  { label: "Đang hiệu lực", value: stats.active, color: "from-emerald-500 to-green-600" },
-                  { label: "Sắp hết hạn (30 ngày)", value: stats.expiring, color: "from-amber-500 to-orange-500" },
-                  { label: "Đã kết thúc", value: stats.completed, color: "from-slate-600 to-slate-700" },
-                ].map((card) => (
-                  <div
-                    key={card.label}
-                    className={`rounded-2xl p-5 bg-gradient-to-br ${card.color} shadow-lg shadow-black/20`}
-                  >
-                    <p className="text-sm uppercase tracking-wider text-white/80">{card.label}</p>
-                    <p className="text-3xl font-bold text-white mt-3">{card.value}</p>
-                  </div>
-                ))}
-              </section>
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/40 text-red-200 rounded-xl p-4">
+                  {error}
+                </div>
+              )}
 
-              <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {quickActions.map((action) => {
-                  const Icon = action.icon;
+              {/* Tổng quan nhanh */}
+              <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                {[
+                  {
+                    label: "Tổng tạm trú",
+                    value: statsOverview.total,
+                    icon: UserCheck,
+                    bg: "from-blue-600 to-indigo-600",
+                  },
+                  {
+                    label: "Đang tạm trú",
+                    value: statsOverview.active,
+                    icon: ShieldCheck,
+                    bg: "from-emerald-500 to-teal-500",
+                  },
+                  {
+                    label: "Cần gia hạn (<30 ngày)",
+                    value: statsOverview.needExtend,
+                    icon: RefreshCw,
+                    bg: "from-amber-500 to-orange-500",
+                  },
+                  {
+                    label: "Đã kết thúc",
+                    value: statsOverview.ended,
+                    icon: Clock3,
+                    bg: "from-slate-600 to-slate-800",
+                  },
+                ].map((card) => {
+                  const Icon = card.icon;
                   return (
-                    <button
-                      key={action.id}
-                      onClick={() => openForm(action.id)}
-                      className={`group rounded-2xl bg-gray-900/80 border border-white/5 p-6 text-left hover:-translate-y-1 hover:border-white/20 transition-transform`}
+                    <div
+                      key={card.label}
+                      className={`rounded-2xl p-5 bg-gradient-to-br ${card.bg} shadow-lg shadow-black/30 border border-white/10 flex items-center gap-4`}
                     >
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.accent} flex items-center justify-center text-white mb-4`}>
+                      <div className="w-12 h-12 rounded-xl bg-black/15 flex items-center justify-center text-white">
                         <Icon className="w-6 h-6" />
                       </div>
-                      <h3 className="text-xl font-semibold text-white mb-2">{action.title}</h3>
-                      <p className="text-sm text-gray-300">{action.description}</p>
-                    </button>
+                      <div>
+                        <p className="text-sm text-white/80 uppercase tracking-wide">{card.label}</p>
+                        <p className="text-3xl font-bold text-white mt-1">{card.value}</p>
+                      </div>
+                    </div>
                   );
                 })}
               </section>
@@ -394,9 +388,9 @@ export default function TemporaryResidents() {
                 <div className="p-6 border-b border-white/5 flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
                   <div>
                     <h2 className="text-2xl font-semibold text-white">Danh sách cư dân tạm trú</h2>
-                    <p className="text-gray-400 text-sm">Theo dõi trạng thái cư trú và xử lý nhanh yêu cầu</p>
+                    <p className="text-gray-400 text-sm">Hiển thị các thông tin cần thiết.</p>
                   </div>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 items-center">
                     <div className="flex items-center bg-gray-800 rounded-xl px-3">
                       <input
                         className="bg-transparent px-3 py-2 text-sm focus:outline-none"
@@ -406,164 +400,160 @@ export default function TemporaryResidents() {
                       />
                       <CalendarClock className="w-4 h-4 text-gray-500" />
                     </div>
-                    <select
-                      className="bg-gray-800/80 text-gray-200 text-sm px-3 py-2 rounded-xl border border-gray-700/60"
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
-                    >
-                      <option value="all">Tất cả trạng thái</option>
-                      <option value="active">Đang tạm trú</option>
-                      <option value="expiring">Sắp hết hạn</option>
-                      <option value="completed">Đã kết thúc</option>
-                    </select>
+                    <div className="flex items-center gap-2 bg-gray-800/80 text-gray-200 text-sm px-3 py-2 rounded-xl border border-gray-700/60">
+                      <span className="text-gray-400">Sắp xếp:</span>
+                      <select
+                        className="bg-transparent focus:outline-none"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                      >
+                        <option value="name">Tên</option>
+                        <option value="start">Ngày bắt đầu</option>
+                        <option value="end">Ngày kết thúc</option>
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => setSortDir((d) => (d === "asc" ? "desc" : "asc"))}
+                        className="text-gray-200 hover:text-white text-xs px-2 py-1 rounded bg-gray-700/60"
+                        title="Đảo thứ tự"
+                      >
+                        {sortDir === "asc" ? "↑" : "↓"}
+                      </button>
+                    </div>
                     <select
                       className="bg-gray-800/80 text-gray-200 text-sm px-3 py-2 rounded-xl border border-gray-700/60"
                       value={durationFilter}
                       onChange={(e) => setDurationFilter(e.target.value)}
                     >
-                      <option value="">Thời hạn cư trú</option>
-                      <option value="<3">Dưới 3 tháng</option>
+                      <option value="all">Thời hạn cư trú</option>
+                      <option value="1-2">1 - 2 tháng</option>
                       <option value="3-6">3 - 6 tháng</option>
-                      <option value=">6">Trên 6 tháng</option>
+                      <option value=">6">Lớn hơn 6 tháng</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-white/5 uppercase text-gray-400">
-                      <tr>
-                        <th className="px-6 py-4 text-left">Mã</th>
-                        <th className="px-6 py-4 text-left">Họ tên</th>
-                        <th className="px-6 py-4 text-left">Địa chỉ tạm trú</th>
-                        <th className="px-6 py-4 text-left">Liên hệ</th>
-                        <th className="px-6 py-4 text-left">Thời hạn</th>
-                        <th className="px-6 py-4 text-left">Trạng thái</th>
-                        <th className="px-6 py-4 text-center">Thao tác</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredResidents.length ? (
-                        filteredResidents.map((resident) => {
-                          const badge = statusConfig[resident.status];
+                  {loading ? (
+                    <div className="p-12 text-center text-gray-400">Đang tải dữ liệu...</div>
+                  ) : filtered.length === 0 ? (
+                    <div className="p-12 text-center text-gray-400">Không có bản ghi phù hợp</div>
+                  ) : (
+                    <table className="w-full text-sm">
+                      <thead className="bg-white/5 uppercase text-gray-400">
+                        <tr>
+                          <th className="px-6 py-4 text-left">Mã</th>
+                          <th className="px-6 py-4 text-left">Họ tên</th>
+                          <th className="px-6 py-4 text-left">Địa chỉ tạm trú</th>
+                          <th className="px-6 py-4 text-left">Liên hệ</th>
+                          <th className="px-6 py-4 text-left">Thời hạn</th>
+                          <th className="px-6 py-4 text-left">Trạng thái</th>
+                          <th className="px-6 py-4 text-center">Thao tác</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {paginated.map((item) => {
+                          const nk = item.nhanKhau || {};
+                          const badge = getStatusBadge(item.trangThai);
                           return (
-                            <tr key={resident.id} className="border-b border-white/5 hover:bg-white/5 transition">
-                              <td className="px-6 py-4 font-semibold text-white">{resident.id}</td>
+                            <tr key={item.maTamTru} className="border-b border-white/5 hover:bg-white/5 transition">
+                              <td className="px-6 py-4 font-semibold text-white">{item.maTamTru}</td>
                               <td className="px-6 py-4">
-                                <p className="font-medium">{resident.fullName}</p>
-                                <p className="text-gray-400">{resident.purpose}</p>
+                                <p className="font-medium text-white">{nk.hoTen}</p>
+                                <p className="text-gray-400 text-xs">CCCD: {nk.cmnd || "—"}</p>
                               </td>
                               <td className="px-6 py-4">
                                 <p className="flex items-center gap-2 text-gray-200">
                                   <MapPin className="w-4 h-4 text-blue-300" />
-                                  {resident.stayAddress}
+                                  {item.noiTamTru || "—"}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-1">Chủ nhà: {resident.landlord}</p>
                               </td>
                               <td className="px-6 py-4">
                                 <p className="flex items-center gap-2 text-gray-200">
                                   <Phone className="w-4 h-4 text-emerald-300" />
-                                  {resident.phone}
+                                  {nk.cmnd || "—"}
                                 </p>
-                                <p className="text-xs text-gray-500 mt-1">{resident.hometown}</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  HK: {nk.hoKhau?.diaChi || "—"}
+                                </p>
                               </td>
                               <td className="px-6 py-4">
                                 <p className="font-semibold text-white">
-                                  {new Date(resident.startDate).toLocaleDateString("vi-VN")} →{" "}
-                                  {new Date(resident.endDate).toLocaleDateString("vi-VN")}
-                                </p>
-                                <p className="text-xs text-gray-400 mt-1">
-                                  {monthsBetween(resident.startDate, resident.endDate)} tháng
+                                  {formatDateRange(item.tuNgay, item.denNgay)}
                                 </p>
                               </td>
+                              <td className="px-6 py-4">{badge}</td>
                               <td className="px-6 py-4">
-                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badge.className}`}>
-                                  {badge.label}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="flex justify-center gap-2">
-                                  {resident.status !== "completed" && (
+                                <div className="flex flex-col items-center gap-2">
+                                  <div className="flex gap-2 flex-wrap justify-center">
                                     <button
-                                      onClick={() => openForm("extend", resident)}
-                                      className="px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-500/20"
+                                      onClick={() => {
+                                        setSelectedRecord(item);
+                                        setShowDetail(true);
+                                      }}
+                                      className="px-3 py-2 rounded-lg bg-blue-500/10 text-blue-200 border border-blue-400/30 hover:bg-blue-500/20 text-sm"
                                     >
-                                      Gia hạn
+                                      <Eye className="w-4 h-4 inline mr-1" />
+                                      Chi tiết
                                     </button>
-                                  )}
-                                  {resident.status === "active" && (
-                                    <button
-                                      onClick={() => openForm("complete", resident)}
-                                      className="px-3 py-2 rounded-lg bg-red-500/10 text-red-300 border border-red-400/30 hover:bg-red-500/20"
-                                    >
-                                      Kết thúc
-                                    </button>
-                                  )}
+                                    {durationDays(item.tuNgay, item.denNgay) < 30 && (
+                                      <button
+                                        onClick={() => {
+                                          setSelectedRecord(item);
+                                          setExtendForm({ newDenNgay: item.denNgay ? item.denNgay.slice(0, 16) : "", lyDo: "", ghiChu: "" });
+                                          setShowExtend(true);
+                                        }}
+                                        className="px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-200 border border-emerald-400/30 hover:bg-emerald-500/20 text-sm"
+                                      >
+                                        <RefreshCw className="w-4 h-4 inline mr-1" />
+                                        Gia hạn
+                                      </button>
+                                    )}
+                                    {item.trangThai === "Dang tam tru" && (
+                                      <button
+                                        onClick={() => handleEnd(item)}
+                                        className="px-3 py-2 rounded-lg bg-red-500/10 text-red-300 border border-red-400/30 hover:bg-red-500/20 text-sm"
+                                      >
+                                        <ShieldCheck className="w-4 h-4 inline mr-1" />
+                                        Kết thúc
+                                      </button>
+                                    )}
+                                  </div>
+                                  {durationDays(item.tuNgay, item.denNgay) < 30 ? (
+                                    <p className="text-xs text-amber-300 flex items-center gap-1">
+                                      <Clock3 className="w-4 h-4" />
+                                      Sắp hết hạn
+                                    </p>
+                                  ) : null}
                                 </div>
                               </td>
                             </tr>
                           );
-                        })
-                      ) : (
-                        <tr>
-                          <td colSpan={7} className="px-6 py-12 text-center text-gray-400">
-                            Không có bản ghi phù hợp
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                        })}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
-              </section>
-
-              <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 bg-gray-900/80 border border-white/5 rounded-3xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold text-white">Nhắc việc & thời hạn</h3>
-                    <Clock3 className="w-5 h-5 text-gray-400" />
-                  </div>
-                  <div className="space-y-4">
-                    {upcomingResidences.map((resident) => (
-                      <div key={resident.id} className="flex items-center justify-between rounded-2xl bg-white/5 p-4">
-                        <div>
-                          <p className="font-semibold text-white">{resident.fullName}</p>
-                          <p className="text-sm text-gray-400">{resident.stayAddress}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-300">
-                            Hết hạn: {new Date(resident.endDate).toLocaleDateString("vi-VN")}
-                          </p>
-                          <button
-                            onClick={() => openForm("extend", resident)}
-                            className="mt-2 text-xs text-blue-300 hover:text-blue-200"
-                          >
-                            Gia hạn nhanh →
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-gray-900/80 border border-white/5 rounded-3xl p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Timeline xử lý</h3>
-                  <div className="space-y-6">
-                    {timeline.map((item, index) => (
-                      <div key={item.title} className="relative pl-8">
-                        {index !== timeline.length - 1 && (
-                          <span className="absolute left-3 top-6 bottom-0 w-px bg-white/10" />
-                        )}
-                        <span className="absolute left-0 top-1 w-6 h-6 rounded-full bg-blue-500/20 border border-blue-400/40 flex items-center justify-center text-xs text-blue-200">
-                          {index + 1}
-                        </span>
-                        <p className="text-white font-semibold">{item.title}</p>
-                        <p className="text-sm text-gray-300">{item.resident}</p>
-                        <p className="text-xs text-gray-500">{item.date}</p>
-                        <span className="inline-flex mt-2 text-xs px-3 py-1 rounded-full bg-white/10 text-gray-200">
-                          {item.status}
-                        </span>
-                      </div>
-                    ))}
+                {/* Pagination */}
+                <div className="flex items-center justify-between px-6 py-4 text-sm text-gray-300 border-t border-white/5">
+                  <p>
+                    Trang {page}/{totalPages} • Hiển thị {paginated.length} / {sorted.length} bản ghi
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      disabled={page === 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="px-3 py-2 rounded-lg bg-gray-800 text-gray-200 disabled:opacity-40"
+                    >
+                      Prev
+                    </button>
+                    <button
+                      disabled={page === totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      className="px-3 py-2 rounded-lg bg-gray-800 text-gray-200 disabled:opacity-40"
+                    >
+                      Next
+                    </button>
                   </div>
                 </div>
               </section>
@@ -572,143 +562,253 @@ export default function TemporaryResidents() {
         </div>
       </div>
 
-      {activeForm && (
+      {/* Modal đăng ký mới */}
+      {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setActiveForm(null)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
           <div className="relative bg-gray-900 rounded-3xl border border-white/5 w-full max-w-xl p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Thao tác</p>
-                <h3 className="text-2xl font-semibold text-white">
-                  {activeForm === "register" && "Đăng ký tạm trú"}
-                  {activeForm === "extend" && "Gia hạn tạm trú"}
-                  {activeForm === "complete" && "Kết thúc tạm trú"}
-                </h3>
+                <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Đăng ký</p>
+                <h3 className="text-2xl font-semibold text-white">Đăng ký tạm trú mới</h3>
               </div>
-              <button onClick={() => setActiveForm(null)} className="text-gray-400 hover:text-white">
-                ✕
-              </button>
+              <button onClick={() => setShowCreate(false)} className="text-gray-400 hover:text-white">✕</button>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {activeForm !== "register" && (
-                <label className="text-sm text-gray-300 sm:col-span-2">
-                  Chọn cư dân cần xử lý
-                  <select
-                    className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 text-gray-100 focus:outline-none focus:border-blue-500"
-                    value={formData.targetId}
-                    onChange={(e) => {
-                      const target = residents.find(
-                        (resident) => resident.id === e.target.value
-                      );
-                      setSelectedResident(target || null);
-                      if (target) {
-                        setFormData((prev) => ({
-                          ...prev,
-                          targetId: target.id,
-                          fullName: target.fullName,
-                          landlord: target.landlord,
-                          phone: target.phone,
-                          stayAddress: target.stayAddress,
-                          startDate: target.startDate,
-                          endDate: target.endDate,
-                          note: target.note || "",
-                        }));
-                      } else {
-                        setFormData((prev) => ({
-                          ...prev,
-                          targetId: e.target.value,
-                        }));
-                      }
-                    }}
-                  >
-                    <option value="">-- Lựa chọn cư dân --</option>
-                    {residents.map((resident) => (
-                      <option key={resident.id} value={resident.id}>
-                        {resident.id} - {resident.fullName}
-                      </option>
-                    ))}
-                  </select>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <label className="text-sm text-gray-300 block">
+                Mã nhân khẩu *
+                <input
+                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
+                  value={createForm.maNhanKhau}
+                  onChange={(e) => setCreateForm({ ...createForm, maNhanKhau: e.target.value })}
+                  placeholder="Nhập mã nhân khẩu"
+                />
+              </label>
+              <label className="text-sm text-gray-300 block">
+                Nơi tạm trú *
+                <input
+                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
+                  value={createForm.noiTamTru}
+                  onChange={(e) => setCreateForm({ ...createForm, noiTamTru: e.target.value })}
+                  placeholder="Địa chỉ tạm trú"
+                />
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label className="text-sm text-gray-300 block">
+                  Từ ngày *
+                  <input
+                    type="datetime-local"
+                    className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
+                    value={createForm.tuNgay}
+                    onChange={(e) => setCreateForm({ ...createForm, tuNgay: e.target.value })}
+                  />
                 </label>
-              )}
-              <label className="text-sm text-gray-300">
-                Họ tên cư dân
+                <label className="text-sm text-gray-300 block">
+                  Đến ngày *
+                  <input
+                    type="datetime-local"
+                    className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
+                    value={createForm.denNgay}
+                    onChange={(e) => setCreateForm({ ...createForm, denNgay: e.target.value })}
+                  />
+                </label>
+              </div>
+              <label className="text-sm text-gray-300 block">
+                Lý do *
                 <input
                   className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  value={createForm.lyDo}
+                  onChange={(e) => setCreateForm({ ...createForm, lyDo: e.target.value })}
+                  placeholder="Lý do tạm trú"
                 />
               </label>
-              <label className="text-sm text-gray-300">
-                CCCD/CMND
-                <input
-                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
-                  value={formData.idNumber}
-                  onChange={(e) => setFormData({ ...formData, idNumber: e.target.value })}
-                />
-              </label>
-              <label className="text-sm text-gray-300">
-                Chủ nhà
-                <input
-                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
-                  value={formData.landlord}
-                  onChange={(e) => setFormData({ ...formData, landlord: e.target.value })}
-                />
-              </label>
-              <label className="text-sm text-gray-300">
-                Số điện thoại
-                <input
-                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </label>
-              <label className="text-sm text-gray-300 sm:col-span-2">
-                Địa chỉ tạm trú
-                <input
-                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
-                  value={formData.stayAddress}
-                  onChange={(e) => setFormData({ ...formData, stayAddress: e.target.value })}
-                />
-              </label>
-              <label className="text-sm text-gray-300">
-                Bắt đầu
-                <input
-                  type="date"
-                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                />
-              </label>
-              <label className="text-sm text-gray-300">
-                Kết thúc
-                <input
-                  type="date"
-                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                />
-              </label>
-              <label className="text-sm text-gray-300 sm:col-span-2">
-                Ghi chú / Yêu cầu
+              <label className="text-sm text-gray-300 block">
+                Ghi chú
                 <textarea
                   className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
                   rows={3}
-                  value={formData.note}
-                  onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                  value={createForm.ghiChu}
+                  onChange={(e) => setCreateForm({ ...createForm, ghiChu: e.target.value })}
                 />
               </label>
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-2xl disabled:opacity-70"
+                >
+                  {submitting ? "Đang xử lý..." : "Lưu đăng ký"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreate(false)}
+                  className="flex-1 bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700 font-semibold py-3 rounded-2xl"
+                >
+                  Hủy bỏ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal gia hạn (kèm tìm kiếm) */}
+      {showExtend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowExtend(false)} />
+          <div className="relative bg-gray-900 rounded-3xl border border-white/5 w-full max-w-2xl p-8 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Gia hạn</p>
+                <h3 className="text-2xl font-semibold text-white">Gia hạn tạm trú</h3>
+                <p className="text-gray-400 text-sm mt-1">
+                  Chỉ hiển thị cư dân có thời hạn &lt; 30 ngày.
+                </p>
+              </div>
+              <button onClick={() => setShowExtend(false)} className="text-gray-400 hover:text-white">✕</button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <div className="bg-gray-800/60 border border-white/5 rounded-2xl p-4">
+              <div className="flex items-center gap-2 bg-gray-900/60 rounded-xl px-3 py-2 mb-3">
+                <Search className="w-4 h-4 text-gray-500" />
+                <input
+                  className="bg-transparent flex-1 text-sm focus:outline-none"
+                  placeholder="Tìm theo tên cư dân..."
+                  value={extendSearch}
+                  onChange={(e) => setExtendSearch(e.target.value)}
+                />
+              </div>
+              <div className="max-h-44 overflow-y-auto space-y-2">
+                {extendCandidates.map((r) => (
+                  <button
+                    key={r.maTamTru}
+                    onClick={() => {
+                      setSelectedRecord(r);
+                      setExtendForm({ newDenNgay: r.denNgay ? r.denNgay.slice(0, 16) : "", lyDo: "", ghiChu: "" });
+                    }}
+                    className={`w-full text-left rounded-xl px-3 py-2 border ${
+                      selectedRecord?.maTamTru === r.maTamTru
+                        ? "border-emerald-400 bg-emerald-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <p className="text-white font-semibold">{r.nhanKhau?.hoTen}</p>
+                    <p className="text-xs text-gray-400">Mã tạm trú: {r.maTamTru}</p>
+                  </button>
+                ))}
+                {extendCandidates.length === 0 && (
+                  <p className="text-gray-400 text-sm text-center py-2">Không có cư dân cần gia hạn.</p>
+                )}
+              </div>
+            </div>
+
+            <form onSubmit={handleExtend} className="space-y-4">
+              <label className="text-sm text-gray-300 block">
+                Ngày kết thúc mới *
+                <input
+                  type="datetime-local"
+                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
+                  value={extendForm.newDenNgay}
+                  onChange={(e) => setExtendForm({ ...extendForm, newDenNgay: e.target.value })}
+                />
+              </label>
+              <label className="text-sm text-gray-300 block">
+                Lý do
+                <input
+                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
+                  value={extendForm.lyDo}
+                  onChange={(e) => setExtendForm({ ...extendForm, lyDo: e.target.value })}
+                />
+              </label>
+              <label className="text-sm text-gray-300 block">
+                Ghi chú
+                <textarea
+                  className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
+                  rows={3}
+                  value={extendForm.ghiChu}
+                  onChange={(e) => setExtendForm({ ...extendForm, ghiChu: e.target.value })}
+                />
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                <button
+                  type="submit"
+                  disabled={submitting || !selectedRecord}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-2xl disabled:opacity-70"
+                >
+                  {submitting ? "Đang xử lý..." : "Gia hạn"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowExtend(false)}
+                  className="flex-1 bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700 font-semibold py-3 rounded-2xl"
+                >
+                  Hủy bỏ
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal kết thúc (kèm tìm kiếm) */}
+      {showEnd && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowEnd(false)} />
+          <div className="relative bg-gray-900 rounded-3xl border border-white/5 w-full max-w-2xl p-8 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Kết thúc</p>
+                <h3 className="text-2xl font-semibold text-white">Kết thúc tạm trú</h3>
+                <p className="text-gray-400 text-sm mt-1">Chỉ hiển thị cư dân đang tạm trú.</p>
+              </div>
+              <button onClick={() => setShowEnd(false)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+
+            <div className="bg-gray-800/60 border border-white/5 rounded-2xl p-4">
+              <div className="flex items-center gap-2 bg-gray-900/60 rounded-xl px-3 py-2 mb-3">
+                <Search className="w-4 h-4 text-gray-500" />
+                <input
+                  className="bg-transparent flex-1 text-sm focus:outline-none"
+                  placeholder="Tìm theo tên cư dân..."
+                  value={endSearch}
+                  onChange={(e) => setEndSearch(e.target.value)}
+                />
+              </div>
+              <div className="max-h-56 overflow-y-auto space-y-2">
+                {endCandidates.map((r) => (
+                  <button
+                    key={r.maTamTru}
+                    onClick={() => {
+                      setSelectedRecord(r);
+                    }}
+                    className={`w-full text-left rounded-xl px-3 py-2 border ${
+                      selectedRecord?.maTamTru === r.maTamTru
+                        ? "border-red-400 bg-red-500/10"
+                        : "border-white/10 bg-white/5 hover:border-white/20"
+                    }`}
+                  >
+                    <p className="text-white font-semibold">{r.nhanKhau?.hoTen}</p>
+                    <p className="text-xs text-gray-400">Mã tạm trú: {r.maTamTru}</p>
+                  </button>
+                ))}
+                {endCandidates.length === 0 && (
+                  <p className="text-gray-400 text-sm text-center py-2">Không có cư dân đang tạm trú.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={handleSubmit}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-2xl"
+                type="button"
+                disabled={submitting || !selectedRecord}
+                onClick={() => selectedRecord && handleEnd(selectedRecord)}
+                className="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold py-3 rounded-2xl disabled:opacity-70"
               >
-                Lưu thao tác
+                {submitting ? "Đang xử lý..." : "Kết thúc tạm trú"}
               </button>
               <button
-                onClick={() => setActiveForm(null)}
+                type="button"
+                onClick={() => setShowEnd(false)}
                 className="flex-1 bg-gray-800 text-gray-300 border border-gray-600 hover:bg-gray-700 font-semibold py-3 rounded-2xl"
               >
                 Hủy bỏ
@@ -717,8 +817,44 @@ export default function TemporaryResidents() {
           </div>
         </div>
       )}
+
+      {/* Modal chi tiết */}
+      {showDetail && selectedRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowDetail(false)} />
+          <div className="relative bg-gray-900 rounded-3xl border border-white/5 w-full max-w-3xl p-8 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-gray-400">Chi tiết</p>
+                <h3 className="text-2xl font-semibold text-white flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-blue-300" />
+                  Bản ghi tạm trú #{selectedRecord.maTamTru}
+                </h3>
+              </div>
+              <button onClick={() => setShowDetail(false)} className="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <DetailCard label="Họ tên" value={selectedRecord.nhanKhau?.hoTen} />
+              <DetailCard label="CCCD" value={selectedRecord.nhanKhau?.cmnd} />
+              <DetailCard label="Địa chỉ tạm trú" value={selectedRecord.noiTamTru} />
+              <DetailCard label="Địa chỉ hộ khẩu" value={selectedRecord.nhanKhau?.hoKhau?.diaChi} />
+              <DetailCard label="Thời hạn" value={formatDateRange(selectedRecord.tuNgay, selectedRecord.denNgay)} />
+              <DetailCard label="Lý do" value={selectedRecord.lyDo} />
+              <DetailCard label="Trạng thái" value={statusMap[selectedRecord.trangThai]?.label || statusMap.default.label} />
+              <DetailCard label="Ghi chú" value={selectedRecord.ghiChu || "—"} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-
+function DetailCard({ label, value }) {
+  return (
+    <div className="rounded-2xl border border-white/10 p-4">
+      <p className="text-xs uppercase text-gray-400">{label}</p>
+      <p className="text-white font-semibold mt-1 break-words">{value || "—"}</p>
+    </div>
+  );
+}
