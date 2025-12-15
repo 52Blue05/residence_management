@@ -23,6 +23,7 @@ import ChangeHouseholdHead from "./pages/ChangeHouseholdHead";
 import FeeTypesManagement from "./pages/FeeTypesManagement";
 import FeeCollectionManagement from "./pages/FeeCollectionManagement";
 import CollectionPeriodsManagement from "./pages/CollectionPeriodsManagement";
+import SplitHousehold from "./pages/SplitHousehold";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/households" element={<QuanLiHoKhau />} />
       <Route path="/households/add" element={<HouseholdAdd />} />
+      <Route path="/households/split" element={<SplitHousehold />} />
       <Route path="/households/change-head" element={<ChangeHouseholdHead />} />
       <Route path="/households/by-area" element={<HouseholdByArea />} />
       <Route path="/hokhau/danh-sach" element={<QuanLiHoKhau />} />
