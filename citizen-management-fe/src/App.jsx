@@ -24,6 +24,11 @@ import FeeTypesManagement from "./pages/FeeTypesManagement";
 import FeeCollectionManagement from "./pages/FeeCollectionManagement";
 import CollectionPeriodsManagement from "./pages/CollectionPeriodsManagement";
 import SplitHousehold from "./pages/SplitHousehold";
+import UserHome from "./pages/UserHome";
+import UserHousehold from "./pages/UserHousehold";
+import UserMembers from "./pages/UserMembers";
+import UserHistory from "./pages/UserHistory";
+import UserProfile from "./pages/UserProfile";
 
 export default function App() {
   return (
@@ -58,10 +63,25 @@ export default function App() {
       <Route path="/fees/periods" element={<CollectionPeriodsManagement />} />
       <Route path="/fees/collection" element={<FeeCollectionManagement />} />
       <Route path="/fees/sanitation" element={<SanitationFeesList />} />
-      <Route path="/fees/sanitation/collect" element={<SanitationFeeCollect />} />
-      <Route path="/fees/settings/sanitation-rate" element={<SanitationFeeSettings />} />
+      <Route
+        path="/fees/sanitation/collect"
+        element={<SanitationFeeCollect />}
+      />
+      <Route
+        path="/fees/settings/sanitation-rate"
+        element={<SanitationFeeSettings />}
+      />
       <Route path="/donations/campaigns" element={<DonationCampaigns />} />
-      <Route path="/donations/campaigns/create" element={<DonationCampaignCreate />} />
+      <Route
+        path="/donations/campaigns/create"
+        element={<DonationCampaignCreate />}
+      />
+      {/* Trang dành cho user (người dân) */}
+      <Route path="/user" element={<UserHome />} />
+      <Route path="/user/household" element={<UserHousehold />} />
+      <Route path="/user/members" element={<UserMembers />} />
+      <Route path="/user/history" element={<UserHistory />} />
+      <Route path="/user/profile" element={<UserProfile />} />
     </Routes>
   );
 }

@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleGoogle = () => {
     console.log("Continue with Google");
@@ -18,10 +21,24 @@ export default function Login() {
     window.location.href = "/auth/microsoft";
   };
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    console.log("Sign in", { email, password, keepSignedIn });
-    navigate("/dashboard");
+    setError("");
+
+    try {
+      // Gọi hàm login từ AuthContext (hiện đang mock, sau này thay bằng API thật)
+      const user = await login(email, password, keepSignedIn);
+
+      // Nếu có mã cán bộ -> trang quản lý, nếu không -> trang dành cho user thường
+      if (user?.maCanBo) {
+        navigate("/dashboard");
+      } else {
+        navigate("/user");
+      }
+    } catch (err) {
+      console.error("Login failed", err);
+      setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+    }
   };
 
   const handleResetPassword = (e) => {
@@ -161,7 +178,7 @@ export default function Login() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -178,6 +195,10 @@ export default function Login() {
                 Reset password
               </button>
             </div>
+
+            {error && (
+              <p className="text-red-400 text-sm mb-4">{error}</p>
+            )}
 
             <button
               className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-semibold"
