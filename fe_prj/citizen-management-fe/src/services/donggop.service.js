@@ -81,4 +81,6 @@ class DongGopService {
   }
 }
 
-export default new DongGopService();
+const donggopService = new DongGopService();
+export default donggopService;
+export { donggopService };

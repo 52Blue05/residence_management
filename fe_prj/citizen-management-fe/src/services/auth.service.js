@@ -6,19 +6,28 @@ import { httpClient } from "./http.client";
 
 class AuthService {
   /**
-   * Login user
+   * Login user with email and password (plain text comparison)
    */
-  async login(username, password) {
+  async login(credentials) {
     try {
+      const { email, password, keepSignedIn } = credentials;
+
+      // Gọi API login, backend sẽ so sánh email và password không mã hóa
       const response = await httpClient.post("/auth/login", {
-        username,
+        email,
         password,
+        keepSignedIn,
       });
 
       if (response.token) {
         httpClient.setAuthToken(response.token);
-        localStorage.setItem("userId", response.id);
-        localStorage.setItem("userRole", response.role);
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("userId", response.user?.id);
+        localStorage.setItem("userRole", response.user?.role);
+
+        if (keepSignedIn) {
+          localStorage.setItem("keepSignedIn", "true");
+        }
       }
 
       return response;

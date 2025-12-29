@@ -74,7 +74,10 @@ class HttpClient {
 
       // Handle non-2xx responses
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const contentType = response.headers.get("content-type");
+        const errorData = contentType?.includes("application/json")
+          ? await response.json().catch(() => ({}))
+          : {};
         const error = new Error(errorData.message || `HTTP ${response.status}`);
         error.status = response.status;
         error.data = errorData;

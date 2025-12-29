@@ -1,13 +1,23 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Filter, MapPin, Pencil, Trash2, Users } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Header from "../headers/Header";
-import { householdRecords } from "../data/households";
+import { householdService } from "../services/household.service";
 
 const typeConfig = {
-  "thuong-tru": { label: "Thường trú", className: "bg-emerald-500/10 text-emerald-300 border border-emerald-600/30" },
-  "tam-tru": { label: "Tạm trú", className: "bg-amber-500/10 text-amber-200 border border-amber-500/30" },
-  "kinh-doanh": { label: "Kinh doanh", className: "bg-blue-500/10 text-blue-200 border border-blue-500/30" },
+  "thuong-tru": {
+    label: "Thường trú",
+    className:
+      "bg-emerald-500/10 text-emerald-300 border border-emerald-600/30",
+  },
+  "tam-tru": {
+    label: "Tạm trú",
+    className: "bg-amber-500/10 text-amber-200 border border-amber-500/30",
+  },
+  "kinh-doanh": {
+    label: "Kinh doanh",
+    className: "bg-blue-500/10 text-blue-200 border border-blue-500/30",
+  },
 };
 
 const areas = Array.from({ length: 7 }, (_, i) => i + 1);
@@ -17,6 +27,19 @@ export default function QuanLiHoKhau() {
   const [filters, setFilters] = useState({ area: "all", type: "all" });
   const [selected, setSelected] = useState(null);
   const [detailMode, setDetailMode] = useState("view");
+  const [householdRecords, setHouseholdRecords] = useState([]);
+
+  useEffect(() => {
+    const fetchHouseholds = async () => {
+      try {
+        const data = await householdService.getAllHouseholds();
+        setHouseholdRecords(data || []);
+      } catch (error) {
+        console.error("Error fetching households:", error);
+      }
+    };
+    fetchHouseholds();
+  }, []);
 
   const filteredHouseholds = useMemo(() => {
     return householdRecords.filter((household) => {
@@ -24,22 +47,41 @@ export default function QuanLiHoKhau() {
         household.id.toLowerCase().includes(search.toLowerCase()) ||
         household.headName.toLowerCase().includes(search.toLowerCase()) ||
         household.address.toLowerCase().includes(search.toLowerCase());
-      const matchesArea = filters.area === "all" ? true : Number(filters.area) === household.area;
-      const matchesType = filters.type === "all" ? true : filters.type === household.type;
+      const matchesArea =
+        filters.area === "all" ? true : Number(filters.area) === household.area;
+      const matchesType =
+        filters.type === "all" ? true : filters.type === household.type;
       return matchesSearch && matchesArea && matchesType;
     });
-  }, [search, filters]);
+  }, [search, filters, householdRecords]);
 
   const stats = useMemo(() => {
     const total = householdRecords.length;
-    const residents = householdRecords.reduce((sum, item) => sum + item.members, 0);
-    const thuongTru = householdRecords.filter((item) => item.type === "thuong-tru").length;
+    const residents = householdRecords.reduce(
+      (sum, item) => sum + item.members,
+      0
+    );
+    const thuongTru = householdRecords.filter(
+      (item) => item.type === "thuong-tru"
+    ).length;
     return [
-      { label: "Tổng hộ khẩu", value: total, description: "Toàn phường La Khê" },
-      { label: "Thường trú", value: thuongTru, description: "Hộ cư trú ổn định" },
-      { label: "Tổng nhân khẩu", value: residents, description: "Số nhân khẩu đã khai báo" },
+      {
+        label: "Tổng hộ khẩu",
+        value: total,
+        description: "Toàn phường La Khê",
+      },
+      {
+        label: "Thường trú",
+        value: thuongTru,
+        description: "Hộ cư trú ổn định",
+      },
+      {
+        label: "Tổng nhân khẩu",
+        value: residents,
+        description: "Số nhân khẩu đã khai báo",
+      },
     ];
-  }, []);
+  }, [householdRecords]);
 
   const openDetail = (household, mode = "view") => {
     setSelected(household);
@@ -78,10 +120,15 @@ export default function QuanLiHoKhau() {
             <div className="w-full h-full p-6 md:p-8 space-y-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">Module</p>
-                  <h1 className="text-3xl font-semibold text-white">Quản lý Hộ khẩu</h1>
+                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">
+                    Module
+                  </p>
+                  <h1 className="text-3xl font-semibold text-white">
+                    Quản lý Hộ khẩu
+                  </h1>
                   <p className="text-gray-300 mt-1 max-w-2xl">
-                    Theo dõi, tra cứu và thao tác nhanh với dữ liệu hộ khẩu của 7 tổ dân phố trong phường La Khê.
+                    Theo dõi, tra cứu và thao tác nhanh với dữ liệu hộ khẩu của
+                    7 tổ dân phố trong phường La Khê.
                   </p>
                 </div>
                 <div className="flex gap-3">
@@ -92,7 +139,9 @@ export default function QuanLiHoKhau() {
                     + Thêm hộ khẩu mới
                   </button>
                   <button
-                    onClick={() => (window.location.href = "/households/by-area")}
+                    onClick={() =>
+                      (window.location.href = "/households/by-area")
+                    }
                     className="px-5 py-3 rounded-xl bg-gray-800 text-gray-200 border border-white/10 hover:bg-gray-700"
                   >
                     Tìm kiếm theo tổ
@@ -102,10 +151,19 @@ export default function QuanLiHoKhau() {
 
               <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {stats.map((card) => (
-                  <div key={card.label} className="bg-gray-900/80 border border-white/5 rounded-2xl p-6 shadow-lg shadow-black/30">
-                    <p className="text-sm text-gray-400 uppercase tracking-wide">{card.label}</p>
-                    <p className="text-3xl font-bold text-white mt-2">{card.value}</p>
-                    <p className="text-xs text-gray-500 mt-1">{card.description}</p>
+                  <div
+                    key={card.label}
+                    className="bg-gray-900/80 border border-white/5 rounded-2xl p-6 shadow-lg shadow-black/30"
+                  >
+                    <p className="text-sm text-gray-400 uppercase tracking-wide">
+                      {card.label}
+                    </p>
+                    <p className="text-3xl font-bold text-white mt-2">
+                      {card.value}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {card.description}
+                    </p>
                   </div>
                 ))}
               </section>
@@ -125,7 +183,9 @@ export default function QuanLiHoKhau() {
                     <select
                       className="bg-gray-800/80 text-sm px-3 py-2 rounded-xl border border-gray-700 text-gray-100"
                       value={filters.area}
-                      onChange={(e) => setFilters({ ...filters, area: e.target.value })}
+                      onChange={(e) =>
+                        setFilters({ ...filters, area: e.target.value })
+                      }
                     >
                       <option value="all">Tất cả tổ dân phố</option>
                       {areas.map((area) => (
@@ -137,7 +197,9 @@ export default function QuanLiHoKhau() {
                     <select
                       className="bg-gray-800/80 text-sm px-3 py-2 rounded-xl border border-gray-700 text-gray-100"
                       value={filters.type}
-                      onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+                      onChange={(e) =>
+                        setFilters({ ...filters, type: e.target.value })
+                      }
                     >
                       <option value="all">Tất cả loại hộ</option>
                       <option value="thuong-tru">Thường trú</option>
@@ -164,17 +226,29 @@ export default function QuanLiHoKhau() {
                         filteredHouseholds.map((household) => {
                           const typeStyle = typeConfig[household.type];
                           return (
-                            <tr key={household.id} className="border-b border-white/5 hover:bg-white/5 transition">
-                              <td className="px-6 py-4 font-semibold text-white">{household.id}</td>
-                              <td className="px-6 py-4 text-gray-200">{household.headName}</td>
+                            <tr
+                              key={household.id}
+                              className="border-b border-white/5 hover:bg-white/5 transition"
+                            >
+                              <td className="px-6 py-4 font-semibold text-white">
+                                {household.id}
+                              </td>
+                              <td className="px-6 py-4 text-gray-200">
+                                {household.headName}
+                              </td>
                               <td className="px-6 py-4 text-gray-300">
                                 <p className="flex items-center gap-2">
-                                  <MapPin className="w-4 h-4 text-blue-300" />Tổ {household.area}
+                                  <MapPin className="w-4 h-4 text-blue-300" />
+                                  Tổ {household.area}
                                 </p>
-                                <p className="text-xs text-gray-500">{household.address}</p>
+                                <p className="text-xs text-gray-500">
+                                  {household.address}
+                                </p>
                               </td>
                               <td className="px-6 py-4">
-                                <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${typeStyle.className}`}>
+                                <span
+                                  className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${typeStyle.className}`}
+                                >
                                   {typeStyle.label}
                                 </span>
                               </td>
@@ -188,13 +262,17 @@ export default function QuanLiHoKhau() {
                                 <div className="flex justify-center gap-2">
                                   <button
                                     className="px-3 py-2 rounded-lg bg-blue-500/10 text-blue-200 border border-blue-400/30"
-                                    onClick={() => openDetail(household, "view")}
+                                    onClick={() =>
+                                      openDetail(household, "view")
+                                    }
                                   >
                                     Xem
                                   </button>
                                   <button
                                     className="px-3 py-2 rounded-lg bg-yellow-500/10 text-yellow-200 border border-yellow-400/30"
-                                    onClick={() => openDetail(household, "edit")}
+                                    onClick={() =>
+                                      openDetail(household, "edit")
+                                    }
                                   >
                                     <Pencil className="w-4 h-4" />
                                   </button>
@@ -211,7 +289,10 @@ export default function QuanLiHoKhau() {
                         })
                       ) : (
                         <tr>
-                          <td colSpan={6} className="px-6 py-10 text-center text-gray-400">
+                          <td
+                            colSpan={6}
+                            className="px-6 py-10 text-center text-gray-400"
+                          >
                             Không có dữ liệu phù hợp
                           </td>
                         </tr>
@@ -221,7 +302,8 @@ export default function QuanLiHoKhau() {
                 </div>
 
                 <div className="px-6 py-4 text-sm text-gray-400 border-t border-white/5">
-                  Hiển thị {filteredHouseholds.length} trên {householdRecords.length} hộ khẩu
+                  Hiển thị {filteredHouseholds.length} trên{" "}
+                  {householdRecords.length} hộ khẩu
                 </div>
               </section>
             </div>
@@ -235,11 +317,20 @@ export default function QuanLiHoKhau() {
           <div className="relative w-full max-w-md bg-gray-950 border-l border-white/10 h-full overflow-y-auto p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-gray-500">Chi tiết hộ khẩu</p>
-                <h3 className="text-2xl font-semibold text-white">{selected.headName}</h3>
-                <p className="text-xs text-gray-400">{selected.id} • Tổ dân phố {selected.area}</p>
+                <p className="text-sm uppercase tracking-[0.3em] text-gray-500">
+                  Chi tiết hộ khẩu
+                </p>
+                <h3 className="text-2xl font-semibold text-white">
+                  {selected.headName}
+                </h3>
+                <p className="text-xs text-gray-400">
+                  {selected.id} • Tổ dân phố {selected.area}
+                </p>
               </div>
-              <button onClick={closeDetail} className="text-gray-400 hover:text-white text-xl">
+              <button
+                onClick={closeDetail}
+                className="text-gray-400 hover:text-white text-xl"
+              >
                 ✕
               </button>
             </div>
@@ -247,20 +338,31 @@ export default function QuanLiHoKhau() {
             <div className="space-y-4 text-sm">
               <div className="rounded-2xl border border-white/10 p-4">
                 <p className="text-gray-400 text-xs uppercase">Địa chỉ</p>
-                <p className="text-white font-semibold mt-1">{selected.address}</p>
+                <p className="text-white font-semibold mt-1">
+                  {selected.address}
+                </p>
               </div>
               <div className="rounded-2xl border border-white/10 p-4">
                 <p className="text-gray-400 text-xs uppercase">Loại hộ</p>
-                <p className="text-white font-semibold mt-1">{typeConfig[selected.type].label}</p>
-                <p className="text-gray-500 text-xs mt-1">Đăng ký: {new Date(selected.registeredAt).toLocaleDateString("vi-VN")}</p>
+                <p className="text-white font-semibold mt-1">
+                  {typeConfig[selected.type].label}
+                </p>
+                <p className="text-gray-500 text-xs mt-1">
+                  Đăng ký:{" "}
+                  {new Date(selected.registeredAt).toLocaleDateString("vi-VN")}
+                </p>
               </div>
               <div className="rounded-2xl border border-white/10 p-4">
                 <p className="text-gray-400 text-xs uppercase">Số nhân khẩu</p>
-                <p className="text-white font-semibold mt-1">{selected.members} người</p>
+                <p className="text-white font-semibold mt-1">
+                  {selected.members} người
+                </p>
               </div>
               <div className="rounded-2xl border border-white/10 p-4">
                 <p className="text-gray-400 text-xs uppercase">Liên hệ</p>
-                <p className="text-white font-semibold mt-1">{selected.phone}</p>
+                <p className="text-white font-semibold mt-1">
+                  {selected.phone}
+                </p>
               </div>
 
               <label className="text-xs uppercase text-gray-400">Ghi chú</label>
@@ -274,15 +376,24 @@ export default function QuanLiHoKhau() {
             <div className="mt-6 flex gap-3">
               {detailMode === "edit" ? (
                 <>
-                  <button className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-semibold" onClick={handleUpdate}>
+                  <button
+                    className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-2xl font-semibold"
+                    onClick={handleUpdate}
+                  >
                     Lưu thay đổi
                   </button>
-                  <button className="flex-1 bg-gray-800 text-gray-300 border border-gray-700 py-3 rounded-2xl" onClick={() => setDetailMode("view")}>
+                  <button
+                    className="flex-1 bg-gray-800 text-gray-300 border border-gray-700 py-3 rounded-2xl"
+                    onClick={() => setDetailMode("view")}
+                  >
                     Huỷ
                   </button>
                 </>
               ) : (
-                <button className="flex-1 bg-gray-800 text-gray-200 border border-gray-700 py-3 rounded-2xl" onClick={() => setDetailMode("edit")}>
+                <button
+                  className="flex-1 bg-gray-800 text-gray-200 border border-gray-700 py-3 rounded-2xl"
+                  onClick={() => setDetailMode("edit")}
+                >
                   Chỉnh sửa
                 </button>
               )}
@@ -293,4 +404,3 @@ export default function QuanLiHoKhau() {
     </div>
   );
 }
-

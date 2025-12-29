@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Filter, Search, Users } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Header from "../headers/Header";
-import { residentRecords } from "../data/residents";
+import { residentService } from "../services/resident.service";
 
 export default function ResidentsSearch() {
   const [form, setForm] = useState({
@@ -15,17 +15,50 @@ export default function ResidentsSearch() {
     occupation: "",
     residenceType: "",
   });
+  const [residentRecords, setResidentRecords] = useState([]);
+
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const data = await residentService.getAllResidents();
+        setResidentRecords(data || []);
+      } catch (error) {
+        console.error("Error fetching residents:", error);
+      }
+    };
+    fetchResidents();
+  }, []);
 
   const results = useMemo(() => {
     return residentRecords.filter((resident) => {
-      if (form.keyword && !resident.name.toLowerCase().includes(form.keyword.toLowerCase())) return false;
+      if (
+        form.keyword &&
+        !resident.name.toLowerCase().includes(form.keyword.toLowerCase())
+      )
+        return false;
       if (form.cccd && !resident.cccd.includes(form.cccd)) return false;
       if (form.gender && resident.gender !== form.gender) return false;
-      if (form.household && !resident.household.toLowerCase().includes(form.household.toLowerCase())) return false;
-      if (form.occupation && !resident.occupation.toLowerCase().includes(form.occupation.toLowerCase())) return false;
-      if (form.residenceType && resident.residenceType !== form.residenceType) return false;
-      if (form.birthFrom && new Date(resident.birthDate) < new Date(form.birthFrom)) return false;
-      if (form.birthTo && new Date(resident.birthDate) > new Date(form.birthTo)) return false;
+      if (
+        form.household &&
+        !resident.household.toLowerCase().includes(form.household.toLowerCase())
+      )
+        return false;
+      if (
+        form.occupation &&
+        !resident.occupation
+          .toLowerCase()
+          .includes(form.occupation.toLowerCase())
+      )
+        return false;
+      if (form.residenceType && resident.residenceType !== form.residenceType)
+        return false;
+      if (
+        form.birthFrom &&
+        new Date(resident.birthDate) < new Date(form.birthFrom)
+      )
+        return false;
+      if (form.birthTo && new Date(resident.birthDate) > new Date(form.birthTo))
+        return false;
       return true;
     });
   }, [form]);
@@ -64,10 +97,15 @@ export default function ResidentsSearch() {
             <div className="w-full h-full p-6 md:p-8 space-y-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">Advanced search</p>
-                  <h1 className="text-3xl font-semibold text-white">Tìm kiếm nâng cao</h1>
+                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">
+                    Advanced search
+                  </p>
+                  <h1 className="text-3xl font-semibold text-white">
+                    Tìm kiếm nâng cao
+                  </h1>
                   <p className="text-gray-300 mt-1 max-w-2xl">
-                    Lọc nhân khẩu theo nhiều tiêu chí kết hợp, hỗ trợ kiểm tra dữ liệu cư trú tinh gọn.
+                    Lọc nhân khẩu theo nhiều tiêu chí kết hợp, hỗ trợ kiểm tra
+                    dữ liệu cư trú tinh gọn.
                   </p>
                 </div>
                 <button
@@ -84,7 +122,10 @@ export default function ResidentsSearch() {
                     <Filter className="w-5 h-5 text-blue-300" />
                     Bộ lọc tìm kiếm
                   </h2>
-                  <button className="text-sm text-blue-300 hover:text-blue-200" onClick={handleReset}>
+                  <button
+                    className="text-sm text-blue-300 hover:text-blue-200"
+                    onClick={handleReset}
+                  >
                     Reset bộ lọc
                   </button>
                 </div>
@@ -112,7 +153,9 @@ export default function ResidentsSearch() {
                     <input
                       className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
                       value={form.household}
-                      onChange={(e) => handleChange("household", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("household", e.target.value)
+                      }
                       placeholder="HK-001"
                     />
                   </label>
@@ -121,7 +164,9 @@ export default function ResidentsSearch() {
                     <input
                       className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
                       value={form.occupation}
-                      onChange={(e) => handleChange("occupation", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("occupation", e.target.value)
+                      }
                       placeholder="Kế toán, công chức..."
                     />
                   </label>
@@ -142,7 +187,9 @@ export default function ResidentsSearch() {
                     <select
                       className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 text-gray-100 focus:outline-none focus:border-blue-500"
                       value={form.residenceType}
-                      onChange={(e) => handleChange("residenceType", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("residenceType", e.target.value)
+                      }
                     >
                       <option value="">Tất cả</option>
                       <option value="thuong-tru">Thường trú</option>
@@ -156,7 +203,9 @@ export default function ResidentsSearch() {
                       type="date"
                       className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
                       value={form.birthFrom}
-                      onChange={(e) => handleChange("birthFrom", e.target.value)}
+                      onChange={(e) =>
+                        handleChange("birthFrom", e.target.value)
+                      }
                     />
                   </label>
                   <label className="text-sm text-gray-300">
@@ -177,21 +226,35 @@ export default function ResidentsSearch() {
                     <Search className="w-5 h-5 text-blue-300" />
                     Kết quả ({results.length})
                   </h2>
-                  <span className="text-xs text-gray-400">Tự động cập nhật khi thay đổi bộ lọc</span>
+                  <span className="text-xs text-gray-400">
+                    Tự động cập nhật khi thay đổi bộ lọc
+                  </span>
                 </div>
                 <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                   {results.length ? (
                     results.map((resident) => (
-                      <div key={resident.id} className="rounded-2xl border border-white/10 p-4 flex flex-col gap-1">
+                      <div
+                        key={resident.id}
+                        className="rounded-2xl border border-white/10 p-4 flex flex-col gap-1"
+                      >
                         <div className="flex items-center justify-between">
-                          <p className="text-white font-semibold">{resident.name}</p>
-                          <span className="text-xs text-gray-500">{resident.cccd}</span>
+                          <p className="text-white font-semibold">
+                            {resident.name}
+                          </p>
+                          <span className="text-xs text-gray-500">
+                            {resident.cccd}
+                          </span>
                         </div>
                         <p className="text-xs text-gray-500">
-                          {new Date(resident.birthDate).toLocaleDateString("vi-VN")} • {resident.gender} • {resident.household}
+                          {new Date(resident.birthDate).toLocaleDateString(
+                            "vi-VN"
+                          )}{" "}
+                          • {resident.gender} • {resident.household}
                         </p>
                         <div className="flex items-center gap-2 text-xs text-gray-300 mt-1">
-                          <span className="px-2 py-0.5 rounded-full bg-white/5">{resident.occupation || "Chưa cập nhật"}</span>
+                          <span className="px-2 py-0.5 rounded-full bg-white/5">
+                            {resident.occupation || "Chưa cập nhật"}
+                          </span>
                           <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-200">
                             {resident.residenceType === "thuong-tru"
                               ? "Thường trú"
@@ -203,7 +266,9 @@ export default function ResidentsSearch() {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-gray-400">Không có nhân khẩu phù hợp với bộ lọc.</p>
+                    <p className="text-sm text-gray-400">
+                      Không có nhân khẩu phù hợp với bộ lọc.
+                    </p>
                   )}
                 </div>
               </section>
@@ -214,7 +279,3 @@ export default function ResidentsSearch() {
     </div>
   );
 }
-
-
-
-

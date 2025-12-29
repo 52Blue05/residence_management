@@ -79,4 +79,6 @@ class PhiVeSinhService {
   }
 }
 
-export default new PhiVeSinhService();
+const phiVeSinhService = new PhiVeSinhService();
+export default phiVeSinhService;
+export { phiVeSinhService };

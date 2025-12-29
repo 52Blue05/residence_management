@@ -13,7 +13,7 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
               Chi tiết nhân khẩu
             </p>
             <h2 className="text-2xl font-semibold text-gray-900">
-              {resident.name}
+              {resident?.hoTen || resident?.name}
             </h2>
           </div>
           <button
@@ -32,19 +32,25 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Họ tên
               </label>
-              <p className="text-gray-900">{resident.name}</p>
+              <p className="text-gray-900">
+                {resident?.hoTen || resident?.name}
+              </p>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Giới tính
               </label>
-              <p className="text-gray-900">{resident.gender || "—"}</p>
+              <p className="text-gray-900">
+                {resident?.gioiTinh || resident?.gender || "—"}
+              </p>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Tuổi
               </label>
-              <p className="text-gray-900">{resident.age || "—"}</p>
+              <p className="text-gray-900">
+                {resident?.tuoi || resident?.age || "—"}
+              </p>
             </div>
           </div>
 
@@ -54,13 +60,17 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Ngày sinh
               </label>
-              <p className="text-gray-900">{resident.birthDate || "—"}</p>
+              <p className="text-gray-900">
+                {resident?.ngaySinh || resident?.birthDate || "—"}
+              </p>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Nơi sinh
               </label>
-              <p className="text-gray-900">{resident.birthPlace || "—"}</p>
+              <p className="text-gray-900">
+                {resident?.noiSinh || resident?.birthPlace || "—"}
+              </p>
             </div>
           </div>
 
@@ -70,13 +80,17 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Số CCCD
               </label>
-              <p className="text-gray-900 font-mono">{resident.cccd || "—"}</p>
+              <p className="text-gray-900 font-mono">
+                {resident?.soCCCD || resident?.cccd || "—"}
+              </p>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Ngày cấp
               </label>
-              <p className="text-gray-900">{resident.issueDate || "—"}</p>
+              <p className="text-gray-900">
+                {resident?.ngayCapCCCD || resident?.issueDate || "—"}
+              </p>
             </div>
           </div>
 
@@ -85,7 +99,9 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
             <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
               Nơi cấp CCCD
             </label>
-            <p className="text-gray-900">{resident.issuePlace || "—"}</p>
+            <p className="text-gray-900">
+              {resident?.noiCapCCCD || resident?.issuePlace || "—"}
+            </p>
           </div>
 
           {/* Row 5: Phone */}
@@ -93,7 +109,9 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
             <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
               Số điện thoại
             </label>
-            <p className="text-gray-900">{resident.phone || "—"}</p>
+            <p className="text-gray-900">
+              {resident?.soDienThoai || resident?.phone || "—"}
+            </p>
           </div>
 
           {/* Row 6: Occupation, Workplace */}
@@ -102,13 +120,17 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Nghề nghiệp
               </label>
-              <p className="text-gray-900">{resident.occupation || "—"}</p>
+              <p className="text-gray-900">
+                {resident?.ngheNghiep || resident?.occupation || "—"}
+              </p>
             </div>
             <div>
               <label className="text-xs font-semibold uppercase text-gray-500 block mb-1">
                 Nơi làm việc
               </label>
-              <p className="text-gray-900">{resident.workplace || "—"}</p>
+              <p className="text-gray-900">
+                {resident?.noiLamViec || resident?.workplace || "—"}
+              </p>
             </div>
           </div>
 
@@ -120,9 +142,11 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
               </label>
               <div>
                 <span className="px-3 py-1 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-300">
-                  {resident.residenceType === "thuong-tru"
+                  {(resident?.loaiCuTru || resident?.residenceType) ===
+                  "thuong-tru"
                     ? "Thường trú"
-                    : resident.residenceType === "tam-tru"
+                    : (resident?.loaiCuTru || resident?.residenceType) ===
+                      "tam-tru"
                     ? "Tạm trú"
                     : "Khác"}
                 </span>
@@ -133,7 +157,7 @@ export default function ResidentDetailModal({ resident, isOpen, onClose }) {
                 Hộ khẩu
               </label>
               <p className="text-gray-900 font-mono">
-                {resident.household || "—"}
+                {resident?.soHoKhau || resident?.household || "—"}
               </p>
             </div>
           </div>

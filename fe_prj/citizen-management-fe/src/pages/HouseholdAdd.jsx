@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { CheckCircle2, ClipboardList, Plus, UserPlus } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Header from "../headers/Header";
-import { residentPool } from "../data/households";
+import { residentService } from "../services/resident.service";
 
 const householdTypes = [
   { value: "thuong-tru", label: "Hộ thường trú" },
@@ -21,6 +21,19 @@ export default function HouseholdAdd() {
   });
   const [members, setMembers] = useState([]);
   const [submitted, setSubmitted] = useState(false);
+  const [residentPool, setResidentPool] = useState([]);
+
+  useEffect(() => {
+    const fetchResidents = async () => {
+      try {
+        const data = await residentService.getAllResidents();
+        setResidentPool(data || []);
+      } catch (error) {
+        console.error("Error fetching residents:", error);
+      }
+    };
+    fetchResidents();
+  }, []);
 
   const headOptions = useMemo(
     () =>
@@ -28,7 +41,7 @@ export default function HouseholdAdd() {
         value: resident.id,
         label: `${resident.name} (${resident.cccd})`,
       })),
-    []
+    [residentPool]
   );
 
   const handleChange = (key, value) => {
@@ -37,13 +50,20 @@ export default function HouseholdAdd() {
 
   const toggleMember = (residentId) => {
     setMembers((prev) =>
-      prev.includes(residentId) ? prev.filter((id) => id !== residentId) : [...prev, residentId]
+      prev.includes(residentId)
+        ? prev.filter((id) => id !== residentId)
+        : [...prev, residentId]
     );
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.bookNumber || !formData.headId || !formData.address || !formData.area) {
+    if (
+      !formData.bookNumber ||
+      !formData.headId ||
+      !formData.address ||
+      !formData.area
+    ) {
       alert("Vui lòng nhập đầy đủ thông tin bắt buộc.");
       return;
     }
@@ -68,15 +88,29 @@ export default function HouseholdAdd() {
             <div className="w-full h-full p-6 md:p-8 space-y-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">Workflow</p>
-                  <h1 className="text-3xl font-semibold text-white">Thêm hộ khẩu mới</h1>
+                  <p className="text-xs uppercase tracking-[0.3em] text-blue-200">
+                    Workflow
+                  </p>
+                  <h1 className="text-3xl font-semibold text-white">
+                    Thêm hộ khẩu mới
+                  </h1>
                   <p className="text-gray-300 mt-1 max-w-2xl">
-                    Điền thông tin hộ khẩu, chọn chủ hộ từ danh sách nhân khẩu và phân loại theo tổ dân phố / loại hộ.
+                    Điền thông tin hộ khẩu, chọn chủ hộ từ danh sách nhân khẩu
+                    và phân loại theo tổ dân phố / loại hộ.
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={() => setFormData({ bookNumber: "", headId: "", address: "", area: "", type: "thuong-tru", note: "" })}
+                  onClick={() =>
+                    setFormData({
+                      bookNumber: "",
+                      headId: "",
+                      address: "",
+                      area: "",
+                      type: "thuong-tru",
+                      note: "",
+                    })
+                  }
                   className="px-5 py-3 rounded-xl bg-gray-800 text-gray-200 border border-white/10 hover:bg-gray-700"
                 >
                   Reset form
@@ -93,7 +127,9 @@ export default function HouseholdAdd() {
                           type="text"
                           className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
                           value={formData.bookNumber}
-                          onChange={(e) => handleChange("bookNumber", e.target.value)}
+                          onChange={(e) =>
+                            handleChange("bookNumber", e.target.value)
+                          }
                           placeholder="Ví dụ: HK-011"
                         />
                       </label>
@@ -136,7 +172,9 @@ export default function HouseholdAdd() {
                         type="text"
                         className="mt-2 w-full rounded-xl bg-gray-800/80 border border-gray-700 px-3 py-2 focus:outline-none focus:border-blue-500"
                         value={formData.address}
-                        onChange={(e) => handleChange("address", e.target.value)}
+                        onChange={(e) =>
+                          handleChange("address", e.target.value)
+                        }
                         placeholder="Số nhà, ngõ, đường..."
                       />
                     </label>
@@ -176,7 +214,9 @@ export default function HouseholdAdd() {
                     </label>
 
                     <div className="space-y-3">
-                      <p className="text-sm font-semibold text-gray-200">Thêm thành viên trong hộ khẩu</p>
+                      <p className="text-sm font-semibold text-gray-200">
+                        Thêm thành viên trong hộ khẩu
+                      </p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
                         {residentPool.map((resident) => (
                           <label
@@ -193,8 +233,12 @@ export default function HouseholdAdd() {
                               checked={members.includes(resident.id)}
                               onChange={() => toggleMember(resident.id)}
                             />
-                            <span className="font-semibold">{resident.name}</span>
-                            <span className="text-xs text-gray-400">{resident.cccd}</span>
+                            <span className="font-semibold">
+                              {resident.name}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {resident.cccd}
+                            </span>
                           </label>
                         ))}
                       </div>
@@ -217,19 +261,28 @@ export default function HouseholdAdd() {
                     </h2>
                     <div className="mt-4 space-y-3 text-sm text-gray-300">
                       <p>
-                        <span className="text-gray-400">Chủ hộ:</span> {headOptions.find((o) => o.value === formData.headId)?.label || "—"}
+                        <span className="text-gray-400">Chủ hộ:</span>{" "}
+                        {headOptions.find((o) => o.value === formData.headId)
+                          ?.label || "—"}
                       </p>
                       <p>
-                        <span className="text-gray-400">Số hộ khẩu:</span> {formData.bookNumber || "—"}
+                        <span className="text-gray-400">Số hộ khẩu:</span>{" "}
+                        {formData.bookNumber || "—"}
                       </p>
                       <p>
-                        <span className="text-gray-400">Tổ dân phố:</span> {formData.area ? `Tổ ${formData.area}` : "—"}
+                        <span className="text-gray-400">Tổ dân phố:</span>{" "}
+                        {formData.area ? `Tổ ${formData.area}` : "—"}
                       </p>
                       <p>
-                        <span className="text-gray-400">Loại hộ:</span> {householdTypes.find((h) => h.value === formData.type)?.label}
+                        <span className="text-gray-400">Loại hộ:</span>{" "}
+                        {
+                          householdTypes.find((h) => h.value === formData.type)
+                            ?.label
+                        }
                       </p>
                       <p>
-                        <span className="text-gray-400">Thành viên:</span> {members.length} người
+                        <span className="text-gray-400">Thành viên:</span>{" "}
+                        {members.length} người
                       </p>
                     </div>
                   </div>
@@ -242,13 +295,32 @@ export default function HouseholdAdd() {
                     <ul className="mt-4 space-y-3 text-sm text-gray-200">
                       {[
                         { label: "Thông tin chủ hộ", done: !!formData.headId },
-                        { label: "Địa chỉ và tổ dân phố", done: !!formData.address && !!formData.area },
+                        {
+                          label: "Địa chỉ và tổ dân phố",
+                          done: !!formData.address && !!formData.area,
+                        },
                         { label: "Loại hộ", done: !!formData.type },
-                        { label: "Danh sách thành viên", done: members.length > 0 },
+                        {
+                          label: "Danh sách thành viên",
+                          done: members.length > 0,
+                        },
                       ].map((item) => (
-                        <li key={item.label} className="flex items-center gap-2">
-                          <CheckCircle2 className={`w-4 h-4 ${item.done ? "text-green-400" : "text-gray-600"}`} />
-                          <span className={item.done ? "text-white" : "text-gray-500"}>{item.label}</span>
+                        <li
+                          key={item.label}
+                          className="flex items-center gap-2"
+                        >
+                          <CheckCircle2
+                            className={`w-4 h-4 ${
+                              item.done ? "text-green-400" : "text-gray-600"
+                            }`}
+                          />
+                          <span
+                            className={
+                              item.done ? "text-white" : "text-gray-500"
+                            }
+                          >
+                            {item.label}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -256,7 +328,8 @@ export default function HouseholdAdd() {
 
                   {submitted && (
                     <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-3xl p-6 text-sm text-emerald-100">
-                      Hộ khẩu mới đã được lưu trong hệ thống (mô phỏng). Bạn có thể quay lại danh sách để kiểm tra.
+                      Hộ khẩu mới đã được lưu trong hệ thống (mô phỏng). Bạn có
+                      thể quay lại danh sách để kiểm tra.
                     </div>
                   )}
                 </div>
@@ -268,7 +341,3 @@ export default function HouseholdAdd() {
     </div>
   );
 }
-
-
-
-

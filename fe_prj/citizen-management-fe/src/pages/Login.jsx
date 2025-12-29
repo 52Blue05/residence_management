@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import authService from "../services/auth.service";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,7 +10,6 @@ export default function Login() {
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const handleGoogle = () => {
     console.log("Continue with Google");
@@ -25,19 +25,46 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    try {
-      // Gọi hàm login từ AuthContext (hiện đang mock, sau này thay bằng API thật)
-      const user = await login(email, password, keepSignedIn);
+    // Validate input
+    if (!email || !password) {
+      setError("Vui lòng nhập email và mật khẩu.");
+      return;
+    }
 
-      // Nếu có mã cán bộ -> trang quản lý, nếu không -> trang dành cho user thường
-      if (user?.maCanBo) {
-        navigate("/dashboard");
-      } else {
-        navigate("/user");
+    try {
+      // Gọi API login với email và password không mã hóa
+      const response = await authService.login({
+        email: email,
+        password: password,
+        keepSignedIn: keepSignedIn,
+      });
+
+      // Lưu token và user info từ response
+      if (response && response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+
+        // Nếu có mã cán bộ -> trang quản lý, nếu không -> trang dành cho user thường
+        if (response.user?.maCanBo) {
+          navigate("/dashboard");
+        } else {
+          navigate("/user");
+        }
       }
     } catch (err) {
       console.error("Login failed", err);
-      setError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+      // Handle different error types
+      if (err instanceof TypeError) {
+        setError(
+          "Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng."
+        );
+      } else if (err.data?.message) {
+        setError(err.data.message);
+      } else {
+        setError(
+          "Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu."
+        );
+      }
     }
   };
 

@@ -2,6 +2,7 @@ package com.example.householdmanagement.service;
 
 import com.example.householdmanagement.dto.TaiKhoanRequest;
 import com.example.householdmanagement.dto.TaiKhoanResponse;
+import com.example.householdmanagement.dto.LoginResponse;
 import com.example.householdmanagement.entity.CanBo;
 import com.example.householdmanagement.entity.TaiKhoan;
 import com.example.householdmanagement.repository.CanBoRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +29,8 @@ public class TaiKhoanService {
     }
 
     public TaiKhoanResponse layTaiKhoanTheoId(Long id) {
-        TaiKhoan tk = taiKhoanRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + id));
+        TaiKhoan tk = taiKhoanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + id));
         return toResponse(tk);
     }
 
@@ -52,7 +55,8 @@ public class TaiKhoanService {
         tk.setMatKhau(req.getMatKhau()); // NOTE: mật khẩu hiện lưu thô, nên băm khi production
         tk.setVaiTro(req.getVaiTro());
         tk.setEmail(req.getEmail());
-        if (req.getTrangThai() != null) tk.setTrangThai(req.getTrangThai());
+        if (req.getTrangThai() != null)
+            tk.setTrangThai(req.getTrangThai());
 
         TaiKhoan saved = taiKhoanRepository.save(tk);
         return toResponse(saved);
@@ -60,7 +64,8 @@ public class TaiKhoanService {
 
     @Transactional
     public TaiKhoanResponse capNhatTaiKhoan(Long id, TaiKhoanRequest req) {
-        TaiKhoan tk = taiKhoanRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + id));
+        TaiKhoan tk = taiKhoanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + id));
 
         if (req.getMaCanBo() != null) {
             CanBo canBo = canBoRepository.findById(req.getMaCanBo())
@@ -68,20 +73,24 @@ public class TaiKhoanService {
             tk.setMaCanBo(canBo);
         }
         if (req.getTenDangNhap() != null && !req.getTenDangNhap().trim().isEmpty()) {
-            if (!req.getTenDangNhap().equals(tk.getTenDangNhap()) && taiKhoanRepository.existsByTenDangNhap(req.getTenDangNhap())) {
+            if (!req.getTenDangNhap().equals(tk.getTenDangNhap())
+                    && taiKhoanRepository.existsByTenDangNhap(req.getTenDangNhap())) {
                 throw new RuntimeException("Tên đăng nhập đã tồn tại");
             }
             tk.setTenDangNhap(req.getTenDangNhap());
         }
-        if (req.getMatKhau() != null) tk.setMatKhau(req.getMatKhau());
-        if (req.getVaiTro() != null) tk.setVaiTro(req.getVaiTro());
+        if (req.getMatKhau() != null)
+            tk.setMatKhau(req.getMatKhau());
+        if (req.getVaiTro() != null)
+            tk.setVaiTro(req.getVaiTro());
         if (req.getEmail() != null) {
             if (!req.getEmail().equals(tk.getEmail()) && taiKhoanRepository.existsByEmail(req.getEmail())) {
                 throw new RuntimeException("Email đã tồn tại");
             }
             tk.setEmail(req.getEmail());
         }
-        if (req.getTrangThai() != null) tk.setTrangThai(req.getTrangThai());
+        if (req.getTrangThai() != null)
+            tk.setTrangThai(req.getTrangThai());
 
         TaiKhoan saved = taiKhoanRepository.save(tk);
         return toResponse(saved);
@@ -89,8 +98,40 @@ public class TaiKhoanService {
 
     @Transactional
     public void xoaTaiKhoan(Long id) {
-        TaiKhoan tk = taiKhoanRepository.findById(id).orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + id));
+        TaiKhoan tk = taiKhoanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + id));
         taiKhoanRepository.delete(tk);
+    }
+
+    /**
+     * Login with email and plain text password comparison
+     */
+    public LoginResponse login(String email, String password) {
+        // Find account by email
+        TaiKhoan tk = taiKhoanRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại hoặc thông tin đăng nhập sai"));
+
+        // Compare plain text password
+        if (!tk.getMatKhau().equals(password)) {
+            throw new RuntimeException("Email không tồn tại hoặc thông tin đăng nhập sai");
+        }
+
+        // Generate a simple JWT-like token (in production, use proper JWT library)
+        String token = "Bearer_" + UUID.randomUUID().toString();
+
+        // Prepare user info
+        LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
+        userInfo.setId(tk.getMaTaiKhoan());
+        userInfo.setEmail(tk.getEmail());
+        userInfo.setTenDangNhap(tk.getTenDangNhap());
+        userInfo.setVaiTro(tk.getVaiTro());
+
+        if (tk.getMaCanBo() != null) {
+            userInfo.setMaCanBo(tk.getMaCanBo().getMaCanBo());
+            userInfo.setHoTen(tk.getMaCanBo().getHoTen());
+        }
+
+        return new LoginResponse(token, userInfo);
     }
 
     private TaiKhoanResponse toResponse(TaiKhoan tk) {
@@ -104,4 +145,3 @@ public class TaiKhoanService {
         return r;
     }
 }
-
