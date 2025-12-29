@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import UserSidebar from "./UserSidebar";
+import NotificationBell from "./NotificationBell";
 
 export default function UserLayout({ children, title, subtitle }) {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -43,36 +44,42 @@ export default function UserLayout({ children, title, subtitle }) {
               )}
             </div>
 
-            <div className="relative" ref={profileRef}>
-              <button
-                onClick={() => setProfileOpen((v) => !v)}
-                className="flex items-center gap-3 bg-white border border-gray-200 px-3 py-2 rounded-md hover:shadow-sm"
-                aria-expanded={profileOpen}
-              >
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-                  {user?.fullName?.[0]?.toUpperCase() || "U"}
-                </div>
-                <div className="text-sm text-gray-800">
-                  {user?.fullName || "Cư dân"}
-                </div>
-              </button>
+            <div className="flex items-center gap-2">
+              {/* Notification Bell */}
+              <NotificationBell />
 
-              {profileOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded shadow-lg z-50 py-2">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-xs text-gray-500">Đăng nhập với</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {user?.email || "—"}
-                    </p>
+              {/* Profile Dropdown */}
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileOpen((v) => !v)}
+                  className="flex items-center gap-3 bg-white border border-gray-200 px-3 py-2 rounded-md hover:shadow-sm"
+                  aria-expanded={profileOpen}
+                >
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+                    {user?.fullName?.[0]?.toUpperCase() || "U"}
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 mt-2"
-                  >
-                    Đăng xuất
-                  </button>
-                </div>
-              )}
+                  <div className="text-sm text-gray-800">
+                    {user?.fullName || "Cư dân"}
+                  </div>
+                </button>
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded shadow-lg z-50 py-2">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-xs text-gray-500">Đăng nhập với</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {user?.email || "—"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 mt-2"
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
@@ -85,4 +92,3 @@ export default function UserLayout({ children, title, subtitle }) {
     </div>
   );
 }
-

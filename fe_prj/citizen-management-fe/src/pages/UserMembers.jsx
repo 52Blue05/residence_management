@@ -1,13 +1,32 @@
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { residentRecords } from "../data/residents";
 import UserLayout from "../components/UserLayout";
+import ResidentDetailModal from "../components/ResidentDetailModal";
+import AddResidentModal from "../components/AddResidentModal";
+import { householdRecords } from "../data/households";
 
 export default function UserMembers() {
   const { user } = useAuth();
-
-  const members = residentRecords.filter(
-    (r) => r.household === user?.householdId
+  const [members, setMembers] = useState(
+    residentRecords.filter((r) => r.household === user?.householdId)
   );
+  const [selectedResident, setSelectedResident] = useState(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+
+  // Check if user is household head
+  const household = householdRecords.find((h) => h.id === user?.householdId);
+  const isHouseholdHead = household && household.headName === user?.fullName;
+
+  const handleAddResident = (newResident) => {
+    setMembers((prev) => [...prev, newResident]);
+  };
+
+  const handleOpenDetail = (resident) => {
+    setSelectedResident(resident);
+    setIsDetailOpen(true);
+  };
 
   return (
     <UserLayout
@@ -15,6 +34,30 @@ export default function UserMembers() {
       subtitle="Danh sách các nhân khẩu thuộc hộ khẩu gắn với tài khoản hiện tại"
     >
       <div className="space-y-4">
+        {/* Add button - only show if user is household head */}
+        {isHouseholdHead && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => setIsAddOpen(true)}
+              className="px-4 py-2 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 font-medium transition flex items-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Thêm nhân khẩu mới
+            </button>
+          </div>
+        )}
 
         {members.length === 0 ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
@@ -43,7 +86,8 @@ export default function UserMembers() {
                 {members.map((m) => (
                   <tr
                     key={m.id}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                    onClick={() => handleOpenDetail(m)}
                   >
                     <td className="py-2 text-gray-900">{m.name}</td>
                     <td className="py-2 text-gray-700">{m.cccd}</td>
@@ -68,9 +112,20 @@ export default function UserMembers() {
             </table>
           </div>
         )}
+
+        {/* Modals */}
+        <ResidentDetailModal
+          resident={selectedResident}
+          isOpen={isDetailOpen}
+          onClose={() => setIsDetailOpen(false)}
+        />
+        <AddResidentModal
+          householdId={user?.householdId}
+          isOpen={isAddOpen}
+          onClose={() => setIsAddOpen(false)}
+          onAdd={handleAddResident}
+        />
       </div>
     </UserLayout>
   );
 }
-
-

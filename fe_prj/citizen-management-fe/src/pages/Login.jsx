@@ -196,9 +196,7 @@ export default function Login() {
               </button>
             </div>
 
-            {error && (
-              <p className="text-red-400 text-sm mb-4">{error}</p>
-            )}
+            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
             <button
               className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded-lg font-semibold"
