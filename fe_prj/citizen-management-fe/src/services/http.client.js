@@ -54,54 +54,40 @@ class HttpClient {
    */
   async request(method, url, options = {}) {
     let requestUrl = `${this.baseURL}${url}`;
+
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    };
+
+    const token = this.getAuthToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const requestOptions = {
       method,
-      headers: this.buildHeaders(options.headers),
-      signal: AbortSignal.timeout(this.timeout),
+      headers,
+      mode: "cors",
+      credentials: "include",
     };
 
     if (options.body) {
       requestOptions.body = JSON.stringify(options.body);
     }
 
-    if (options.params) {
-      const queryString = new URLSearchParams(options.params).toString();
-      requestUrl += `?${queryString}`;
-    }
-
     try {
       const response = await fetch(requestUrl, requestOptions);
 
-      // Handle non-2xx responses
       if (!response.ok) {
-        const contentType = response.headers.get("content-type");
-        const errorData = contentType?.includes("application/json")
-          ? await response.json().catch(() => ({}))
-          : {};
-        const error = new Error(errorData.message || `HTTP ${response.status}`);
-        error.status = response.status;
-        error.data = errorData;
-        throw error;
+        const errorData = await response.json().catch(() => ({}));
+        const err = new Error(errorData.message || "Request failed");
+        err.data = errorData;
+        err.status = response.status;
+        throw err;
       }
 
-      // Try to parse JSON response
-      const contentType = response.headers.get("content-type");
-      if (contentType?.includes("application/json")) {
-        return await response.json();
-      }
-
-      return response;
-    } catch (error) {
-      // Handle specific error types
-      if (error.name === "AbortError") {
-        throw new Error("Request timeout");
-      }
-
-      if (error instanceof SyntaxError) {
-        throw new Error("Invalid JSON response from server");
-      }
-
-      throw error;
+      return await response.json();
+    } catch (err) {
+      throw err;
     }
   }
 

@@ -108,27 +108,14 @@ public class TaiKhoanService {
      * Login with email and plain text password comparison
      */
     public LoginResponse login(String email, String password) {
-        // Find account by email; if not found, allow login by username (tenDangNhap)
-        TaiKhoan tk = null;
-        if (email != null) {
-            tk = taiKhoanRepository.findByEmail(email).orElse(null);
-        }
-        if (tk == null) {
-            // fallback: treat provided identifier as username
-            tk = taiKhoanRepository.findByTenDangNhap(email)
-                    .orElseThrow(() -> new RuntimeException(
-                            "Email hoặc tên đăng nhập không tồn tại hoặc thông tin đăng nhập sai"));
-        }
+        TaiKhoan tk = taiKhoanRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Email không tồn tại"));
 
-        // Compare plain text password
-        if (!tk.getMatKhau().equals(password)) {
-            throw new RuntimeException("Email không tồn tại hoặc thông tin đăng nhập sai");
-        }
+        if (!tk.getMatKhau().equals(password))
+            throw new RuntimeException("Sai mật khẩu");
 
-        // Generate a simple JWT-like token (in production, use proper JWT library)
-        String token = "Bearer_" + UUID.randomUUID().toString();
+        String token = "Bearer_" + UUID.randomUUID();
 
-        // Prepare user info
         LoginResponse.UserInfo userInfo = new LoginResponse.UserInfo();
         userInfo.setId(tk.getMaTaiKhoan());
         userInfo.setEmail(tk.getEmail());
