@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Filter, MapPin, Pencil, Trash2, Users } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import Header from "../headers/Header";
@@ -29,11 +29,23 @@ export default function QuanLiHoKhau() {
   const [detailMode, setDetailMode] = useState("view");
   const [householdRecords, setHouseholdRecords] = useState([]);
 
+  const uidCounter = useRef(0);
+
   useEffect(() => {
     const fetchHouseholds = async () => {
       try {
         const data = await householdService.getAllHouseholds();
-        setHouseholdRecords(data || []);
+        const list = data || [];
+        // Ensure each record has a stable key for React rendering.
+        const mapped = list.map((h, i) => {
+          if (h.id) return { ...h, _uid: h.id };
+          uidCounter.current += 1;
+          return {
+            ...h,
+            _uid: h._uid || `hk-${Date.now()}-${uidCounter.current}-${i}`,
+          };
+        });
+        setHouseholdRecords(mapped);
       } catch (error) {
         console.error("Error fetching households:", error);
       }
@@ -44,9 +56,11 @@ export default function QuanLiHoKhau() {
   const filteredHouseholds = useMemo(() => {
     return householdRecords.filter((household) => {
       const matchesSearch =
-        household.id.toLowerCase().includes(search.toLowerCase()) ||
-        household.headName.toLowerCase().includes(search.toLowerCase()) ||
-        household.address.toLowerCase().includes(search.toLowerCase());
+        (household.id?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (household.headName?.toLowerCase() || "").includes(
+          search.toLowerCase()
+        ) ||
+        (household.address?.toLowerCase() || "").includes(search.toLowerCase());
       const matchesArea =
         filters.area === "all" ? true : Number(filters.area) === household.area;
       const matchesType =
@@ -58,7 +72,7 @@ export default function QuanLiHoKhau() {
   const stats = useMemo(() => {
     const total = householdRecords.length;
     const residents = householdRecords.reduce(
-      (sum, item) => sum + item.members,
+      (sum, item) => sum + (item.members || 0),
       0
     );
     const thuongTru = householdRecords.filter(
@@ -223,11 +237,14 @@ export default function QuanLiHoKhau() {
                     </thead>
                     <tbody>
                       {filteredHouseholds.length ? (
-                        filteredHouseholds.map((household) => {
-                          const typeStyle = typeConfig[household.type];
+                        filteredHouseholds.map((household, idx) => {
+                          const typeStyle = typeConfig[household.type] ?? {
+                            label: household.type || "-",
+                            className: "",
+                          };
                           return (
                             <tr
-                              key={household.id}
+                              key={household._uid ?? `household-${idx}`}
                               className="border-b border-white/5 hover:bg-white/5 transition"
                             >
                               <td className="px-6 py-4 font-semibold text-white">
@@ -247,7 +264,9 @@ export default function QuanLiHoKhau() {
                               </td>
                               <td className="px-6 py-4">
                                 <span
-                                  className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${typeStyle.className}`}
+                                  className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
+                                    typeStyle.className || ""
+                                  }`}
                                 >
                                   {typeStyle.label}
                                 </span>
@@ -345,11 +364,15 @@ export default function QuanLiHoKhau() {
               <div className="rounded-2xl border border-white/10 p-4">
                 <p className="text-gray-400 text-xs uppercase">Loại hộ</p>
                 <p className="text-white font-semibold mt-1">
-                  {typeConfig[selected.type].label}
+                  {typeConfig[selected.type]?.label || selected.type || "-"}
                 </p>
                 <p className="text-gray-500 text-xs mt-1">
                   Đăng ký:{" "}
-                  {new Date(selected.registeredAt).toLocaleDateString("vi-VN")}
+                  {selected.registeredAt
+                    ? new Date(selected.registeredAt).toLocaleDateString(
+                        "vi-VN"
+                      )
+                    : "-"}
                 </p>
               </div>
               <div className="rounded-2xl border border-white/10 p-4">

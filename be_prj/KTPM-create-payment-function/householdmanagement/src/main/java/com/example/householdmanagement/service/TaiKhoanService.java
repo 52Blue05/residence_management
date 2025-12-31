@@ -1,19 +1,20 @@
 package com.example.householdmanagement.service;
 
-import com.example.householdmanagement.dto.TaiKhoanRequest;
-import com.example.householdmanagement.dto.TaiKhoanResponse;
-import com.example.householdmanagement.dto.LoginResponse;
-import com.example.householdmanagement.entity.CanBo;
-import com.example.householdmanagement.entity.TaiKhoan;
-import com.example.householdmanagement.repository.CanBoRepository;
-import com.example.householdmanagement.repository.TaiKhoanRepository;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.example.householdmanagement.dto.LoginResponse;
+import com.example.householdmanagement.dto.TaiKhoanRequest;
+import com.example.householdmanagement.dto.TaiKhoanResponse;
+import com.example.householdmanagement.entity.CanBo;
+import com.example.householdmanagement.entity.TaiKhoan;
+import com.example.householdmanagement.repository.CanBoRepository;
+import com.example.householdmanagement.repository.TaiKhoanRepository;
 
 @Service
 public class TaiKhoanService {
@@ -127,7 +128,7 @@ public class TaiKhoanService {
         userInfo.setVaiTro(tk.getVaiTro());
 
         if (tk.getMaCanBo() != null) {
-            userInfo.setMaCanBo(tk.getMaCanBo().getMaCanBo());
+            userInfo.setMaCanBo(tk.getMaCanBo().getMaCanBo().toString());
             userInfo.setHoTen(tk.getMaCanBo().getHoTen());
         }
 
